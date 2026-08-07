@@ -97,6 +97,8 @@ namespace hpl {
 
 		iRenderer* GetRenderer(eRenderer aType);
 		void ReloadRendererData();
+
+		bool SetScreenSize(const cVector2l& avSize, bool abFullscreen);
 		
 		iFrameBuffer* CreateFrameBuffer(const tString& asName);
 		void DestroyFrameBuffer(iFrameBuffer* apFrameBuffer);

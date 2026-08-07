@@ -254,6 +254,30 @@ namespace hpl {
 	}
 
 	//-----------------------------------------------------------------------
+
+	bool cGraphics::SetScreenSize(const cVector2l& avSize, bool abFullscreen)
+	{
+		if(mbScreenIsSetup==false) return false;
+
+		if(mpLowLevelGraphics->SetWindowSize(avSize, abFullscreen)==false)
+		{
+			return false;
+		}
+
+		for(size_t i=0; i<mvRenderers.size(); ++i)
+		{
+			iRenderer *pRenderer = mvRenderers[i];
+			if(pRenderer==NULL) continue;
+
+			pRenderer->DestroyData();
+			pRenderer->SetupRenderFunctions(mpLowLevelGraphics);
+			pRenderer->LoadData();
+		}
+
+		return true;
+	}
+
+	//-----------------------------------------------------------------------
 	
 	iFrameBuffer* cGraphics::CreateFrameBuffer(const tString& asName)
 	{

@@ -90,6 +90,11 @@ namespace hpl {
 		* Get fullscreen mode
 		*/
 		virtual bool GetFullscreenModeActive() = 0;
+
+		/*
+		 * Resize the window and/or toggle fullscreen at runtime without recreating the GL context!!
+		 */
+		virtual bool SetWindowSize(const cVector2l& avSize, bool abFullscreen)=0;
 		
 		/**
 		 * Set if vsync should be active

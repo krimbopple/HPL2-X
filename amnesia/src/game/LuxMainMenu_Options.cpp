@@ -472,14 +472,14 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		// Resolution
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","Resolution"), pGroup);
 		mpCBResolution = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(175, 25), _W(""), pGroup);
-		SetUpInput(pLabel, mpCBResolution, true, kTranslate("OptionsMenu","ResolutionTip"));
+		SetUpInput(pLabel, mpCBResolution, false, kTranslate("OptionsMenu","ResolutionTip"));
 
 		vPosInGroup.x += mpCBResolution->GetSize().x + 100;
 
 		/////////////////////////////////
 		// Full screen and Vsync
 		mpChBFullScreen = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,2,0), -1, kTranslate("OptionsMenu","FullScreen"), pGroup);
-		SetUpInput(NULL, mpChBFullScreen, true, kTranslate("OptionsMenu","FullScreenTip"));
+		SetUpInput(NULL, mpChBFullScreen, false, kTranslate("OptionsMenu","FullScreenTip"));
 
 		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10,0), 0, kTranslate("OptionsMenu","VSync"), pGroup);
 		SetUpInput(NULL, mpChBVSync, false, kTranslate("OptionsMenu","VSyncTip"));
@@ -1434,13 +1434,36 @@ void cLuxMainMenu_Options::ApplyChanges()
 		cMaterialManager* pMatMgr = gpBase->mpEngine->GetResources()->GetMaterialManager();
 
         const cVideoMode vidMode = mvScreenSizes[mpCBResolution->GetSelectedItem()];
+		bool bFullscreen = mpChBFullScreen->IsChecked();
+
+		bool bDisplayChanged = (vidMode.mlDisplay != pCfgHdr->mlDisplay);
+		bool bResolutionChanged = (vidMode.mvScreenSize != pCfgHdr->mvScreenSize) || bDisplayChanged || (bFullscreen != pCfgHdr->mbFullscreen);
+
 		pCfgHdr->mvScreenSize = vidMode.mvScreenSize;
         pCfgHdr->mlDisplay = vidMode.mlDisplay;
-		pCfgHdr->mbFullscreen = mpChBFullScreen->IsChecked();
+		pCfgHdr->mbFullscreen = bFullscreen;
 		pCfgHdr->mbVSync = mpChBVSync->IsChecked();
 //		pCfgHdr->mbAdaptiveVSync = mpChBAdaptiveVSync->IsChecked();
 		pGfx->GetLowLevel()->SetVsyncActive(pCfgHdr->mbVSync, pCfgHdr->mbAdaptiveVSync);
 		pGfx->GetLowLevel()->SetGammaCorrection(GetGamma());
+
+		if(bResolutionChanged)
+		{
+			bool bAppliedLive = false;
+			if(vidMode.isFullScreenDesktop()==false && bDisplayChanged==false)
+			{
+				bAppliedLive = pGfx->SetScreenSize(vidMode.mvScreenSize, bFullscreen);
+			}
+
+			if(bAppliedLive)
+			{
+				gpBase->mpMainMenu->RecreateGui();
+			}
+			else
+			{
+				gpBase->mpConfigHandler->SetGameNeedsRestart();
+			}
+		}
 
 		// Parallax
 		//int lParallax = (int)mpCBParallaxQuality->GetSelectedItem() - 1;

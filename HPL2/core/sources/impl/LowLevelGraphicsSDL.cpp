@@ -778,6 +778,46 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
+	bool cLowLevelGraphicsSDL::SetWindowSize(const cVector2l& avSize, bool abFullscreen)
+	{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+        if(mpScreen==NULL) return false;
+
+        if(avSize.x <= 0 || avSize.y <= 0) return false;
+
+        if(SDL_SetWindowFullscreen(mpScreen, 0) != 0)
+        {
+            Error("Could not clear fullscreen before resize! %s\n", SDL_GetError());
+        }
+
+        SDL_SetWindowSize(mpScreen, avSize.x, avSize.y);
+
+        if(abFullscreen)
+        {
+            if(SDL_SetWindowFullscreen(mpScreen, SDL_WINDOW_FULLSCREEN) != 0)
+            {
+                Error("Could not set fullscreen mode! %s\n", SDL_GetError());
+                return false;
+            }
+        }
+        else
+        {
+            SDL_SetWindowPosition(mpScreen, SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay), SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay));
+        }
+
+        int w,h;
+        SDL_GetWindowSize(mpScreen, &w, &h);
+        mvScreenSize = cVector2l(w, h);
+        mbFullscreen = abFullscreen;
+
+        return true;
+#else
+        return false;
+#endif
+	}
+
+	//-----------------------------------------------------------------------
+
 	//////////////////////////////////////////////////////////////////////////
 	// DATA CREATION
 	//////////////////////////////////////////////////////////////////////////

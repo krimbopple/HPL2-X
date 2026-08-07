@@ -129,6 +129,8 @@ namespace hpl {
 
 		bool GetFullscreenModeActive() { return mbFullscreen; }
 
+		bool SetWindowSize(const cVector2l& avSize, bool abFullscreen);
+
 		void SetVsyncActive(bool abX, bool abAdaptive);
 
 		void SetMultisamplingActive(bool abX);
