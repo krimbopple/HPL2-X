@@ -163,7 +163,8 @@ private:
 	float mfAlphaFade;
 
 	bool mbExitPreMenu;
-	
+	bool mbTransitioning;
+
 	cGuiGfxElement* mpBlackFade;
 
 	std::vector<cLuxPreMenuSection*> mvSections;

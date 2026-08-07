@@ -488,6 +488,11 @@ kGuiCallbackDeclaredFuncEnd(cLuxPreMenu, Gamma_UIArrowPressed);
 
 void cLuxPreMenu::ButtonPressed()
 {
+	// prevent skipping while section is being loaded/unloaded to prevent crash
+	if (mbTransitioning) return;
+	if (mCurrentState == eLuxPreMenuState_Final) return;
+	if (mbExitPreMenu) return;
+
 	if(mpCurrentSection && mpCurrentSection->mbAllowSkipping==false) return;
 	
 	mCurrentState = eLuxPreMenuState_FastFadeOut;
@@ -637,6 +642,7 @@ void cLuxPreMenu::UpdateState()
 		{
 			if(mfAlphaFade==1)
 			{
+				mbTransitioning = true;
 				if(mpCurrentBackground)
 				{
 					mpGui->DestroyGfx(mpCurrentBackground);
@@ -731,6 +737,7 @@ void cLuxPreMenu::UpdateState()
 							float fFadeSpeed = mpCurrentSection->mfMusicFadeTime ==0 ? 100.0f : 1.0f / mpCurrentSection->mfMusicFadeTime;
 							pMusHandler->Play(mpCurrentSection->msMusic, mpCurrentSection->mfMusicVolume, fFadeSpeed, true, false);
 						}
+						mbTransitioning = false;
 					}
 				}
 			}
