@@ -1325,9 +1325,28 @@ void cLuxInputHandler::UpdatePreMenuInput()
 	
 	////////////////////
 	//Key press
-	if(gpBase->mpPreMenu->IsContinueButtonVisible()==false && mpInput->CheckForInput())
+	if(gpBase->mpPreMenu->IsContinueButtonVisible()==false)
 	{
-		gpBase->mpPreMenu->ButtonPressed();
+		bool bAnyInput = mpInput->CheckForInput();
+
+#ifdef USE_GAMEPAD
+		if(bAnyInput==false)
+		{
+			for(int i=0; i<mpInput->GetGamepadNum(); ++i)
+			{
+				if(mpInput->GetGamepad(i)->ButtonIsPressed())
+				{
+					bAnyInput = true;
+					break;
+				}
+			}
+		}
+#endif
+
+		if(bAnyInput)
+		{
+			gpBase->mpPreMenu->ButtonPressed();
+		}
 	}
 }
 
