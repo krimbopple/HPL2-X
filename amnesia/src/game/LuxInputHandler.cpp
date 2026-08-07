@@ -1325,7 +1325,7 @@ void cLuxInputHandler::UpdatePreMenuInput()
 	
 	////////////////////
 	//Key press
-	if(mpInput->BecameTriggerd(eLuxAction_Exit) || mpInput->BecameTriggerd(eLuxAction_UIPrimary))
+	if(gpBase->mpPreMenu->IsContinueButtonVisible()==false && mpInput->CheckForInput())
 	{
 		gpBase->mpPreMenu->ButtonPressed();
 	}

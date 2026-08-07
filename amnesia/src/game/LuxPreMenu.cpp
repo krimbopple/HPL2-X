@@ -232,6 +232,23 @@ cLuxPreMenu::cLuxPreMenu() : iLuxUpdateable("LuxPreMenu")
 	mpBContinue->SetVisible(false);
 
 	///////////////////////////////////////
+	//  "press any key to skip" indicator
+	{
+		tWString sSkipLabel = kTranslate("PreMenu", "PressAnyKeyToSkip");
+
+		cVector2f vSkipFontSize(14, 14);
+		cVector2f vSkipSize(mvGuiSetCenterSize.x, 24);
+		cVector3f vSkipPos(0, mvGuiSetCenterSize.y - vSkipSize.y - 12, 3.0f);
+
+		mpLSkipIndicator = mpGuiSet->CreateWidgetLabel(vSkipPos, vSkipSize, sSkipLabel, NULL);
+		mpLSkipIndicator->SetDefaultFontSize(vSkipFontSize);
+		mpLSkipIndicator->SetTextAlign(eFontAlign_Center);
+		mpLSkipIndicator->SetDefaultFontColor(cColor(1,1,1,0.6f));
+		mpLSkipIndicator->SetVisible(false);
+		mpLSkipIndicator->SetEnabled(false);
+	}
+
+	///////////////////////////////////////
 	// Create gamma widgets
 	{
 		cVector2f vCenter = mvGuiSetCenterSize*0.5f;
@@ -539,6 +556,8 @@ void cLuxPreMenu::UpdateActions(float afTimeStep)
 	case eLuxPreMenuState_Final:
 		{
 			mbExitPreMenu = true;
+			mpLSkipIndicator->SetVisible(false);
+			mpLSkipIndicator->SetEnabled(false);
 		}
 		break;
 
@@ -649,6 +668,9 @@ void cLuxPreMenu::UpdateState()
 				{
 					mCurrentState = eLuxPreMenuState_Final;
 					mpCurrentSection = NULL;
+
+					mpLSkipIndicator->SetVisible(false);
+					mpLSkipIndicator->SetEnabled(false);
 				}
 				////////////////////////////
 				// New Sections
@@ -682,6 +704,10 @@ void cLuxPreMenu::UpdateState()
 						mpBContinue->SetVisible(bGuiSetActive);
 						mpBContinue->SetEnabled(bGuiSetActive);
 						mpGuiSet->SetDrawMouse(bGuiSetActive);
+
+						bool bShowSkipIndicator = mpCurrentSection->mbAllowSkipping && bGuiSetActive==false;
+						mpLSkipIndicator->SetVisible(bShowSkipIndicator);
+						mpLSkipIndicator->SetEnabled(bShowSkipIndicator);
 
 						////////////////////////////////////////////
 						// Set up text

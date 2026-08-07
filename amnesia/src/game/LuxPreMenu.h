@@ -174,6 +174,8 @@ private:
 	
 	cWidgetButton* mpBContinue;
 
+	cWidgetLabel* mpLSkipIndicator;
+
 	cWidgetDummy* mpGGamma;
 	cWidgetImage* mpIGammaPreview;
 	cWidgetLabel* mpLGamma;
