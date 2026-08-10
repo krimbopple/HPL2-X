@@ -32,6 +32,8 @@
 #include "LuxJournal.h"
 #include "LuxGlobalDataHandler.h"
 #include "LuxAchievementHandler.h"
+#include "LuxConfigHandler.h"
+#include "LuxDebugHandler.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -776,6 +778,11 @@ void cLuxInventory::OnEnterContainer(const tString& asOldContainer)
 	mpViewport->SetVisible(true);
 	mpGuiSet->SetActive(true);
 
+	if(gpBase->mpConfigHandler->mbFullscreen==false) {
+		gpBase->mpEngine->GetInput()->GetLowLevel()->LockInput(false);
+	}
+	gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
+
 #ifdef USE_GAMEPAD
 	if(gpBase->mpInputHandler->IsGamepadPresent() == false)
 	{
@@ -855,6 +862,15 @@ void cLuxInventory::OnLeaveContainer(const tString& asNewContainer)
 	mpViewport->SetActive(false);
 	mpViewport->SetVisible(false);
 	mpGuiSet->SetActive(false);
+
+	if (gpBase->mpDebugHandler->GetDebugWindowActive()==false)
+	{
+		if(gpBase->mpConfigHandler->mbFullscreen==false)
+		{
+			gpBase->mpEngine->GetInput()->GetLowLevel()->LockInput(true);
+		}
+		gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(true);
+	}
 
 	mbExitToJournal = false;
 	mbEnterFromJournal = false;
