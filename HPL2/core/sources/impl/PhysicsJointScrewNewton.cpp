@@ -134,7 +134,8 @@ namespace hpl {
 		if(pScrewJoint->mfMinDistance == 0 && pScrewJoint->mfMaxDistance == 0) return 0;
 
 		//Avoid oscillation
-		CheckLimitAutoSleep(pScrewJoint, pScrewJoint->mfMinDistance,pScrewJoint->mfMaxDistance,fDistance);
+		CheckLimitAutoSleep(pScrewJoint, pScrewJoint->mfMinDistance,pScrewJoint->mfMaxDistance,fDistance,
+							pDesc->m_timestep);
 
 		if (fDistance < pScrewJoint->mfMinDistance)
 		{

@@ -185,7 +185,7 @@ namespace hpl {
 
 		void SetAllControllersPaused(bool abX);
 
-		bool OnPhysicsUpdate();
+		bool OnPhysicsUpdate(float afTimeStep);
 
 		void SetSound(cSoundEntity *apSound);
 		cSoundEntity* GetSound(){ return mpSound;}
@@ -218,7 +218,7 @@ namespace hpl {
 		cJointLimitEffect mMaxLimit;
 		cJointLimitEffect mMinLimit;
 
-		int mlSpeedCount;
+		float mfSpeedCount;
 
 		cMatrixf m_mtxPrevChild;
 		cMatrixf m_mtxPrevParent;
@@ -244,7 +244,6 @@ namespace hpl {
 		bool mbLimitAutoSleep;
 		float mfLimitAutoSleepDist;
 		int mlLimitAutoSleepNumSteps;
-
 		cSoundEntity *mpSound;
 		int mlSoundID;
 		bool mbHasCollided;
@@ -252,12 +251,12 @@ namespace hpl {
 		iPhysicsJointCallback *mpCallback;
 		bool mbAutoDeleteCallback;
 
-		int mlLimitStepCount;
+		float mfLimitStepCount;
 
 		void *mpUserData;
 
 		static void CheckLimitAutoSleep(iPhysicsJoint *apJoint, const float afMin, const float afMax,
-										const float afDist);
+										const float afDist, const float afTimeStep);
 
 
 		void OnMaxLimit();

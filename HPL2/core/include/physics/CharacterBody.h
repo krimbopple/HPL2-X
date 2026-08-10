@@ -206,8 +206,8 @@ namespace hpl {
 		cVector3f GetForceVelocity(){ return mvVelocity;}
 
 		bool IsOnGround();
-		void SetMaxOnGroundCount(int alX) { mlMaxOnGroundCount = alX;}
-		int GetMaxOnGroundCount() { return mlMaxOnGroundCount;}
+		void SetMaxOnGroundCount(float afX) { mfMaxOnGroundCount = afX;}
+		float GetMaxOnGroundCount() { return mfMaxOnGroundCount;}
 
 		void SetCollideFlags(tFlag alX);
 		inline tFlag GetCollideFlags() const { return mlCollideFlags;}
@@ -422,8 +422,8 @@ namespace hpl {
 		float mfPitch;
 		float mfYaw;
 
-        int mlOnGroundCount;
-		int mlMaxOnGroundCount;
+        float mfOnGroundCount;
+		float mfMaxOnGroundCount;
 
 		float mfMaxPushMass;
 		float mfPushForce;

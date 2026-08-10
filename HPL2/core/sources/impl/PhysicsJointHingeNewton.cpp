@@ -193,7 +193,7 @@ namespace hpl {
 
 			///////////////////////////
 			//Avoid oscillation
-			CheckLimitAutoSleep(this, mfMinAngle,mfMaxAngle,fAngle);
+			CheckLimitAutoSleep(this, mfMinAngle,mfMaxAngle,fAngle, afTimestep);
 			
 			bool bSkipLimitCheck = false;
 			if(std::abs(mfPreviousAngle - fAngle) > cMath::ToRad(300)) bSkipLimitCheck = true;

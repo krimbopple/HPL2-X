@@ -131,7 +131,8 @@ namespace hpl {
 		if(pSliderJoint->mfMinDistance == 0 && pSliderJoint->mfMaxDistance == 0) return 0;
 
 		//Avoid oscillation
-		CheckLimitAutoSleep(pSliderJoint, pSliderJoint->mfMinDistance,pSliderJoint->mfMaxDistance,fDistance);
+		CheckLimitAutoSleep(pSliderJoint, pSliderJoint->mfMinDistance,pSliderJoint->mfMaxDistance,fDistance,
+							pDesc->m_timestep);
 
 		if (fDistance < pSliderJoint->mfMinDistance)
 		{

@@ -278,7 +278,7 @@ namespace hpl {
 		int mlRollSoundEntityID;
 		cMatrixf m_mtxPrevScrapeMatrix;
 		bool mbHasSlide;
-		int mlSlideCount;
+		float mfSlideCount;
 		int mlImpactCount;
 		bool mbInUpdateList;
 

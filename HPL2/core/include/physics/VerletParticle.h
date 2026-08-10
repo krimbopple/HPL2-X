@@ -161,8 +161,8 @@ namespace hpl {
 		float mfSleepCheckCount;
 		float mfSleepCheckTime;
 		float mfSleepCheckSqrLimit;
-		int mlSleepCount;
-		int mlSleepMaxCount;
+		float mfSleepCount;
+		float mfSleepMaxTime;
                 
 		cVector3f mvGravityForce;
 		float mfDamping;

@@ -76,7 +76,7 @@ namespace hpl {
 
 		mfBuoyancyDensityMul = 1.0f;
 
-		mlSlideCount = 0;
+		mfSlideCount = 0;
 		mlImpactCount = 0;
 
 		mbInUpdateList = false;
@@ -361,7 +361,7 @@ namespace hpl {
 			if(GetScrapeSoundEntity())
 			{
 				//Log("Checking stop sound (%d), body (%d): Count: %d \n", GetScrapeSoundEntity(), this, mlSlideCount);
-				if(mlSlideCount<=0)
+				if(mfSlideCount<=0)
 				{
 					//Log("Stopped scrape %d on body '%s' IN BODY!\n", (size_t)GetScrapeSoundEntity(),
 					//												 GetName().c_str());
@@ -377,15 +377,15 @@ namespace hpl {
 					SetScrapeSoundEntity(NULL);
 					SetScrapeBody(NULL);
 				}
-				else if(mlSlideCount>0)
+				else if(mfSlideCount>0)
 				{
-					mlSlideCount--;
+					mfSlideCount -= afTimeStep;
 				}
 			}
 		}
 		else
 		{
-			mlSlideCount = 8;
+			mfSlideCount = 8.0f/60.0f;
 		}
 
 		//////////////////////////////////

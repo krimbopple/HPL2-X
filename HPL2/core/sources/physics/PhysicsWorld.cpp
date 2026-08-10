@@ -138,7 +138,7 @@ namespace hpl {
 		{
 			iPhysicsJoint *pJoint = *JointIt;
 
-			if(pJoint->OnPhysicsUpdate()==false)
+			if(pJoint->OnPhysicsUpdate(afTimeStep)==false)
 			{
 				++JointIt;
 				continue;

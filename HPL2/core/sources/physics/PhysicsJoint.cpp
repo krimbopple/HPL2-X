@@ -108,9 +108,9 @@ namespace hpl {
 		mbStickyMinLimit = false;
 		mbStickyMaxLimit = false;
 
-		mlLimitStepCount =0;
+		mfLimitStepCount =0;
 
-		mlSpeedCount =0;
+		mfSpeedCount =0;
 
 		mbLimitAutoSleep = false;
 		mfLimitAutoSleepDist = 0.02f;
@@ -348,7 +348,7 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 	
-	bool iPhysicsJoint::OnPhysicsUpdate()
+	bool iPhysicsJoint::OnPhysicsUpdate(float afTimeStep)
 	{
 		bool bFrozen = true;
         if(mpParentBody && mpParentBody->GetEnabled()) 
@@ -470,9 +470,9 @@ namespace hpl {
 			// Speed is over limit
 			if(fSpeed > mfMinMoveSpeed)
 			{
-				if(mlSpeedCount >= 3)
+				if(mfSpeedCount >= 3.0f/60.0f)
 				{
-					mlSpeedCount =0;
+					mfSpeedCount =0;
 					mpSound = pWorld->CreateSoundEntity("MoveSound",msMoveSound, true);
 					if(mpSound)	{
 						mlSoundID = mpSound->GetCreationID();
@@ -484,14 +484,14 @@ namespace hpl {
 				}
 				else
 				{
-					mlSpeedCount++;
+					mfSpeedCount += afTimeStep;
 				}
 			}
 			/////////////////////////////
 			// Speed is under limit
 			else
 			{
-				mlSpeedCount =0;
+				mfSpeedCount =0;
 			}
 		}
 		
@@ -590,7 +590,7 @@ namespace hpl {
 
 	void iPhysicsJoint::CheckLimitAutoSleep(iPhysicsJoint *apJoint, 
 											const float afMin, const float afMax,
-											const float afDist)
+											const float afDist, const float afTimeStep)
 	{
 		if(apJoint->mbLimitAutoSleep)
 		{
@@ -600,14 +600,14 @@ namespace hpl {
 			if(	fMaxDiff < apJoint->mfLimitAutoSleepDist || 
 				fMinDiff < apJoint->mfLimitAutoSleepDist)
 			{
-				if(apJoint->mlLimitStepCount >= apJoint->mlLimitAutoSleepNumSteps)
+				if(apJoint->mfLimitStepCount >= (float)apJoint->mlLimitAutoSleepNumSteps / 60.0f)
 					apJoint->mpChildBody->DisableAfterSimulation();
 				else
-					apJoint->mlLimitStepCount++;
+					apJoint->mfLimitStepCount += afTimeStep;
 			}
 			else
 			{
-				apJoint->mlLimitStepCount =0;
+				apJoint->mfLimitStepCount =0;
 			}
 		}
 	}

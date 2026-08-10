@@ -352,8 +352,8 @@ namespace hpl {
 		mlCameraSmoothPosNum =0;
 		mlEntitySmoothPosNum =0;
 
-		mlOnGroundCount = 0;
-		mlMaxOnGroundCount = 12;
+		mfOnGroundCount = 0;
+		mfMaxOnGroundCount = 12.0f/60.0f;
 
 		mfMaxStepHeight = mvSize.y *0.2f;
 		mfMaxStepHeightInAir = mfMaxStepHeight;
@@ -1066,7 +1066,7 @@ namespace hpl {
 
 	bool iCharacterBody::IsOnGround()
 	{
-		return mlOnGroundCount >0;
+		return mfOnGroundCount >0;
 	}
 
 	//-----------------------------------------------------------------------
@@ -1660,7 +1660,7 @@ namespace hpl {
 		}
 		
 
-		bool bFirmlyOnGround = mlOnGroundCount > mlMaxOnGroundCount-4;
+		bool bFirmlyOnGround = mfOnGroundCount > mfMaxOnGroundCount * (8.0f/12.0f);
 		float fMaxHeight = (bFirmlyOnGround || mbClimbing) ? mfMaxStepHeight : mfMaxStepHeightInAir;
 
 		/////////////////////////////////
@@ -1696,7 +1696,7 @@ namespace hpl {
 		if(mbClimbing)
 		{
 			mfCheckStepClimbCount =0;	//If climbing, we always check
-			mlOnGroundCount = mlMaxOnGroundCount;
+			mfOnGroundCount = mfMaxOnGroundCount;
 		}
 		else
 		{
@@ -1843,12 +1843,12 @@ namespace hpl {
 				//Check if the push back is mostly up and velocity points down, else decrement, ie signal that the player is not on ground.
 				if(mvVelocity.y && cMath::Vector3Normalize(vPushBack).y >= 0.001f)
 				{
-					mlOnGroundCount = mlMaxOnGroundCount;
+					mfOnGroundCount = mfMaxOnGroundCount;
 				}
 				else
 				{
-					mlOnGroundCount--;
-					if(mlOnGroundCount<0) mlOnGroundCount =0;
+					mfOnGroundCount -= afTimeStep;
+					if(mfOnGroundCount<0) mfOnGroundCount =0;
 				}
 				
 				
@@ -1884,15 +1884,15 @@ namespace hpl {
 			else
 			{
 				//Decerement the ground count,
-				mlOnGroundCount--;
-				if(mlOnGroundCount<0) mlOnGroundCount =0;
+				mfOnGroundCount -= afTimeStep;
+				if(mfOnGroundCount<0) mfOnGroundCount =0;
 
 				//Calculate the new velocity
 				vNewVelocity.y += mvVelocity.y;
 
 				///////////////////////////
 				//If no collision and on ground and not climbing then cast ray to get ground normal
-				if(mlOnGroundCount > 0 && mbClimbing==false)
+				if(mfOnGroundCount > 0 && mbClimbing==false)
 				{
 					mpRayCallback->Clear();
 					cVector3f vStart = GetFeetPosition() + cVector3f(0,0.001f,0);

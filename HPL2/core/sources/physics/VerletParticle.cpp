@@ -159,8 +159,8 @@ namespace hpl {
 		mbSleeping = false;
 		mfSleepCheckCount =0;
 		mfSleepCheckTime = 1.0f / 3.0f;
-		mlSleepCount =0;
-		mlSleepMaxCount = 3;
+		mfSleepCount =0;
+		mfSleepMaxTime = 3.0f/60.0f;
 		mfSleepCheckSqrLimit = 0.0015f * 0.0015f;
 
 		mlUpdateCount =0;
@@ -200,7 +200,7 @@ namespace hpl {
 		if(mbSleeping == abX) return;
 
 		mbSleeping = abX;
-		mlSleepCount = 0;
+		mfSleepCount = 0;
         mfSleepCheckCount = 0;
 
 		SetSpecificDataSleeping(abX);
@@ -256,15 +256,15 @@ namespace hpl {
 			//Update counter and see if sleeping should start
             if(bAllSleeping)
 			{
-				mlSleepCount++;
-				if(mlSleepMaxCount <= mlSleepCount)
+				mfSleepCount += afTimeStep;
+				if(mfSleepMaxTime <= mfSleepCount)
 				{
 					SetSleeping(true);
 				}
 			}
 			else
 			{
-				mlSleepCount =0;
+				mfSleepCount =0;
 			}
 		}
 	}
