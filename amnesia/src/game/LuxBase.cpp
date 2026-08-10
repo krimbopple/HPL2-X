@@ -1154,7 +1154,7 @@ bool cLuxBase::InitEngine()
 	
 	mpEngine->SetLimitFPS(mpConfigHandler->mbUncapFPS == false);
 	mpEngine->SetUpdatesPerSec(mpConfigHandler->mlSimulationRate);
-	mpEngine->SetWaitIfAppOutOfFocus(mpMainConfig->GetBool("Engine","SleepWhenOutOfFocus", true));
+	mpEngine->SetWaitIfAppOutOfFocus(mpConfigHandler->mbSleepWhenOutOfFocus);
 
 	cMaterialManager* pMatMgr = mpEngine->GetResources()->GetMaterialManager();
 	pMatMgr->SetTextureSizeDownScaleLevel(mpConfigHandler->mlTextureQuality);

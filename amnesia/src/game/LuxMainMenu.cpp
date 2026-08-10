@@ -565,7 +565,7 @@ void cLuxMainMenu::ExitPressed()
 
 void cLuxMainMenu::AppLostInputFocus()
 {
-	if(gpBase->mpMapHandler->MapIsLoaded()==false)
+	if(gpBase->mpMapHandler->MapIsLoaded()==false && gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
 	{
 		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
 		pMusHdlr->Pause();
@@ -576,7 +576,7 @@ void cLuxMainMenu::AppLostInputFocus()
 
 void cLuxMainMenu::AppGotInputFocus()
 {
-	if(gpBase->mpMapHandler->MapIsLoaded()==false)
+	if(gpBase->mpMapHandler->MapIsLoaded()==false && gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
 	{
 		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
 		pMusHdlr->Resume();

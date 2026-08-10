@@ -7,6 +7,7 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 #### Added
 - Live window resizing and renderer reloading for resolution changes
 - Hardware cursor instead of software
+- Broadcast focus change while waiting for input focus
 
 #### Changed
 - Retargeted Visual Studio solution to v143 toolset (VS 2022)
@@ -21,6 +22,7 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 - Live window resizing and renderer reloading for resolution changes
 - Simulation Rate option (60/120/144/240 Hz)
 - Uncap FPS option to render as fast as possible instead of locking to the simulation rate
+- "Pause game on focus loss" option to keep the game running when the window is unfocused
 - Hardware cursor instead of software
 
 #### Changed

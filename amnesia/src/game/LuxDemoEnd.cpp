@@ -19,6 +19,7 @@
 
 #include "LuxDemoEnd.h"
 
+#include "LuxConfigHandler.h"
 #include "LuxHelpFuncs.h"
 #include "LuxDebugHandler.h"
 #include "LuxLoadScreenHandler.h"
@@ -294,16 +295,22 @@ void cLuxDemoEnd::OnDraw(float afFrameTime)
 
 void cLuxDemoEnd::AppLostInputFocus()
 {
-	cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
-	pMusHdlr->Pause();
+	if(gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
+	{
+		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
+		pMusHdlr->Pause();
+	}
 }
 
 //-----------------------------------------------------------------------
 
 void cLuxDemoEnd::AppGotInputFocus()
 {
-	cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
-	pMusHdlr->Resume();
+	if(gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
+	{
+		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
+		pMusHdlr->Resume();
+	}
 }
 
 //-----------------------------------------------------------------------

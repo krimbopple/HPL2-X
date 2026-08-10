@@ -522,7 +522,7 @@ void cLuxPreMenu::OnDraw(float afFrameTime)
 
 void cLuxPreMenu::AppLostInputFocus()
 {
-	if(gpBase->mpMapHandler->MapIsLoaded()==false)
+	if(gpBase->mpMapHandler->MapIsLoaded()==false && gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
 	{
 		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
 		pMusHdlr->Pause();
@@ -533,7 +533,7 @@ void cLuxPreMenu::AppLostInputFocus()
 
 void cLuxPreMenu::AppGotInputFocus()
 {
-	if(gpBase->mpMapHandler->MapIsLoaded()==false)
+	if(gpBase->mpMapHandler->MapIsLoaded()==false && gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
 	{
 		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
 		pMusHdlr->Resume();

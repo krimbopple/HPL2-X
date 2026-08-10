@@ -361,6 +361,12 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	// Crosshair Checkbox
 	mpChBShowCrosshair = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu", "ShowCrosshair"), apTab);
 	SetUpInput(NULL, mpChBShowCrosshair, false, kTranslate("OptionsMenu", "ShowCrosshairTip"));
+
+	///////////////////////////////////////////////
+	// Pause on focus loss Checkbox
+	mpChBPauseOnFocusLoss = mpGuiSet->CreateWidgetCheckBox(vPos + cVector3f(mpChBShowCrosshair->GetSize().x + 15,0,0), 0, GetOptionsMenuString("PauseOnFocusLoss", _W("Pause game on focus loss")), apTab);
+	SetUpInput(NULL, mpChBPauseOnFocusLoss, false, GetOptionsMenuString("PauseOnFocusLossTip", _W("Pause the game when the window is not in focus. Uncheck to keep the game running while unfocused.")));
+
 	vPos.y += mpChBShowCrosshair->GetSize().y + 15;
 
 	///////////////////////////////////////////////
@@ -397,6 +403,7 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	mpChBShowHints->SetFocusNavigation(eUIArrow_Down, mpChBShowDeathHints);
 	mpChBShowDeathHints->SetFocusNavigation(eUIArrow_Down, mpChBShowCrosshair);
 	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Down, mpCBFocusIconStyle);
+	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Down, mpCBFocusIconStyle);
 	if(mbShowCommentary)
 	{
 		mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Down, mpChBShowCommentary);
@@ -421,6 +428,7 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	mpChBShowHints->SetFocusNavigation(eUIArrow_Up, mpChBShowSubtitles);
 	mpChBShowDeathHints->SetFocusNavigation(eUIArrow_Up, mpChBShowHints);
 	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Up, mpChBShowDeathHints);
+	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Up, mpChBShowDeathHints);
 	mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Up, mpChBShowCrosshair);
 	if(mbShowCommentary)
 		mpChBShowCommentary->SetFocusNavigation(eUIArrow_Up, mpCBFocusIconStyle);
@@ -428,6 +436,8 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	// Left/Right
 	mpChBShowSubtitles->SetFocusNavigation(eUIArrow_Right, mpChBShowEffectSubtitles);
 	mpChBShowEffectSubtitles->SetFocusNavigation(eUIArrow_Left, mpChBShowSubtitles);
+	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Right, mpChBPauseOnFocusLoss);
+	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Left, mpChBShowCrosshair);
 }
 
 //-----------------------------------------------------------------------
@@ -1112,6 +1122,7 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		mpChBShowDeathHints->SetChecked(aObj.GetVarBool("ShowDeathHints"), false);
 
 		mpChBShowCrosshair->SetChecked(aObj.GetVarBool("ShowCrosshair"), false);
+		mpChBPauseOnFocusLoss->SetChecked(aObj.GetVarBool("PauseOnFocusLoss"), false);
 
 		mpCBFocusIconStyle->SetSelectedItem(aObj.GetVarInt("FocusIconStyle"), false, false);
 		if(mpCBFocusIconStyle->GetSelectedItem()==-1)
@@ -1477,6 +1488,8 @@ void cLuxMainMenu_Options::ApplyChanges()
 		gpBase->mpMessageHandler->SetShowEffectSubtitles(mpChBShowEffectSubtitles->IsChecked());
 		gpBase->mpHintHandler->SetActive(mpChBShowHints->IsChecked());
 		gpBase->mpPlayer->GetHelperDeath()->SetShowHint(mpChBShowDeathHints->IsChecked());
+		pCfgHdr->mbSleepWhenOutOfFocus = mpChBPauseOnFocusLoss->IsChecked();
+		gpBase->mpEngine->SetWaitIfAppOutOfFocus(pCfgHdr->mbSleepWhenOutOfFocus);
 
 		if(mbShowCommentary)
 		{
@@ -1821,6 +1834,7 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("ShowCrosshair", gpBase->mpPlayer->GetShowCrosshair());
 		aObj.AddVarInt("FocusIconStyle", gpBase->mpPlayer->GetFocusIconStyle());
 		aObj.AddVarBool("ShowCommentary", gpBase->mpMapHandler->GetShowCommentary());
+		aObj.AddVarBool("PauseOnFocusLoss", gpBase->mpConfigHandler->mbSleepWhenOutOfFocus);
 
 		// Language
 		aObj.AddVarString("Language", gpBase->mpConfigHandler->msLangFile);
@@ -1919,6 +1933,7 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 
 		aObj.AddVarBool("ShowCrosshair",	mpChBShowCrosshair->IsChecked());
 		aObj.AddVarInt("FocusIconStyle",	mpCBFocusIconStyle->GetSelectedItem());
+		aObj.AddVarBool("PauseOnFocusLoss", mpChBPauseOnFocusLoss->IsChecked());
 
 		aObj.AddVarString("Language",		cString::To8Char(mvLangFiles[mpCBLanguage->GetSelectedItem()]));
 	}

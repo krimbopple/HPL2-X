@@ -56,6 +56,7 @@ public:
 	bool mbAdaptiveVSync;
 	bool mbUncapFPS;
 	int mlSimulationRate;
+	bool mbSleepWhenOutOfFocus;
 	int mlTextureQuality;
 	int mlTextureFilter;
 	float mfTextureAnisotropy;

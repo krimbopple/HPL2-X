@@ -145,6 +145,7 @@ private:
 	cWidgetCheckBox *mpChBShowCrosshair;
 	cWidgetComboBox *mpCBFocusIconStyle;
 	cWidgetCheckBox *mpChBShowCommentary;
+	cWidgetCheckBox *mpChBPauseOnFocusLoss;
 	
 	// Graphics;
 	cWidgetDummy	*mpDBasicGfxOptions;

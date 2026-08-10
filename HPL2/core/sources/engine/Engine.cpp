@@ -828,9 +828,11 @@ namespace hpl {
 		iLowLevelGraphics *pllGfx = mpGraphics->GetLowLevel();
 		while(	pllGfx->GetWindowInputFocus()==false)
 		{
+			CheckAndBroadcastFocusChange();
 			cPlatform::Sleep(100);
 			mpInput->Update(1.0f/10.0f);
 		}
+		CheckAndBroadcastFocusChange();
 	}
 
 	//-----------------------------------------------------------------------

@@ -19,6 +19,7 @@
 
 #include "LuxCredits.h"
 
+#include "LuxConfigHandler.h"
 #include "LuxHelpFuncs.h"
 #include "LuxDebugHandler.h"
 #include "LuxLoadScreenHandler.h"
@@ -361,16 +362,22 @@ void cLuxCredits::OnDraw(float afFrameTime)
 
 void cLuxCredits::AppLostInputFocus()
 {
-	cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
-	pMusHdlr->Pause();
+	if(gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
+	{
+		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
+		pMusHdlr->Pause();
+	}
 }
 
 //-----------------------------------------------------------------------
 
 void cLuxCredits::AppGotInputFocus()
 {
-	cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
-	pMusHdlr->Resume();
+	if(gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
+	{
+		cMusicHandler* pMusHdlr = gpBase->mpEngine->GetSound()->GetMusicHandler();
+		pMusHdlr->Resume();
+	}
 }
 
 //-----------------------------------------------------------------------

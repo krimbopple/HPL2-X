@@ -527,7 +527,8 @@ void cLuxMapHandler::SetSavedMapCollection(cLuxSavedGameMapCollection *apMaps)
 
 void cLuxMapHandler::AppLostInputFocus()
 {
-	PauseSoundsAndMusic();
+	if(gpBase->mpConfigHandler->mbSleepWhenOutOfFocus)
+		PauseSoundsAndMusic();
 }
 
 //-----------------------------------------------------------------------
