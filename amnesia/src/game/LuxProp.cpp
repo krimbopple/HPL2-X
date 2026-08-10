@@ -1266,14 +1266,14 @@ void iLuxProp::UpdateMoving(float afTimeStep)
 	bool bHasMoveSpeed = false;
 	if(mbMovingLinear)
 	{
-		const float fMinLinear = 0.001f * (1.0f/60.0f);
+		const float fMinLinear = 0.001f * gpBase->mpEngine->GetStepSize();
 
 		float fSpeedSqr = cMath::Vector3DistSqr(m_mtxLastBodyMoveMatrix.GetTranslation(), GetMainBody()->GetLocalMatrix().GetTranslation());
 		if(fSpeedSqr > fMinLinear*fMinLinear) bHasMoveSpeed = true;
 	}
 	if(bHasMoveSpeed == false && mbMovingAngular)
 	{
-		const float fMinAngular = 0.001f * (1.0f/60.0f);
+		const float fMinAngular = 0.001f * gpBase->mpEngine->GetStepSize();
 
 		cVector3f vVel = cMath::MatrixEulerAngleDistance(m_mtxLastBodyMoveMatrix.GetRotation(), GetMainBody()->GetLocalMatrix().GetRotation());
 		float fSpeedSqr = vVel.SqrLength();

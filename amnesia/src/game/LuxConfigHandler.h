@@ -54,6 +54,8 @@ public:
 	bool mbFullscreen;
 	bool mbVSync;
 	bool mbAdaptiveVSync;
+	bool mbUncapFPS;
+	int mlSimulationRate;
 	int mlTextureQuality;
 	int mlTextureFilter;
 	float mfTextureAnisotropy;

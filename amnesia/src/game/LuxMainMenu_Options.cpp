@@ -88,6 +88,40 @@ static int GetSSAOSamplesFromIndex(int alX)
 
 //-----------------------------------------------------------------------
 
+static int GetSimulationRateFromIndex(int alX)
+{
+	switch(alX)
+	{
+	case 0: return 60;
+	case 1: return 120;
+	case 2: return 144;
+	case 3: return 240;
+	}
+	return 60;
+}
+
+static int GetIndexFromSimulationRate(int alX)
+{
+	switch(alX)
+	{
+	case 120: return 1;
+	case 144: return 2;
+	case 240: return 3;
+	}
+	return 0;
+}
+
+//-----------------------------------------------------------------------
+
+static tWString GetOptionsMenuString(const tString& asName, const tWString& asFallback)
+{
+	tWString sText = gpBase->mpEngine->GetResources()->Translate("OptionsMenu", asName);
+	if(sText.empty()) sText = asFallback;
+	return sText;
+}
+
+//-----------------------------------------------------------------------
+
 cResourceVarsObject cLuxMainMenu_Options::mInitialValues = cResourceVarsObject();
 cResourceVarsObject cLuxMainMenu_Options::mCurrentValues = cResourceVarsObject();
 
@@ -129,6 +163,8 @@ cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSki
 	mbShowCommentary = gpBase->mpMenuCfg->GetBool("Options","ShowCommentary", false);
 
 	mbSettingInitialValues = false;
+
+	mbSimRateWarningPending = false;
 
 	mbKeyConfigOpen = false;
 }
@@ -465,7 +501,7 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos,0, kTranslate("OptionsMenu", "Screen"), apDummy);
 	{
 		float fBorderSize = 15;
-		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,70));
+		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,135));
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		/////////////////////////////////
@@ -473,6 +509,20 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","Resolution"), pGroup);
 		mpCBResolution = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(175, 25), _W(""), pGroup);
 		SetUpInput(pLabel, mpCBResolution, false, kTranslate("OptionsMenu","ResolutionTip"));
+
+		/////////////////////////////////
+		// Simulation Rate
+		cVector3f vSimRatePos = cVector3f(fBorderSize, fBorderSize, 0.1f);
+		vSimRatePos.y += pLabel->GetSize().y + 5 + mpCBResolution->GetSize().y + 15;
+		pLabel = mpGuiSet->CreateWidgetLabel(vSimRatePos, -1, GetOptionsMenuString("SimulationRate", _W("Simulation Rate")), pGroup);
+		mpCBSimulationRate = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(110, 25), _W(""), pGroup);
+		SetUpInput(pLabel, mpCBSimulationRate, true, GetOptionsMenuString("SimulationRateTip", _W("How many times per second the game simulation runs. Higher values are smoother but much heavier on the CPU.")));
+		mpCBSimulationRate->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(SimulationRate_OnChange));
+
+		mpCBSimulationRate->AddItem(_W("60 Hz"));
+		mpCBSimulationRate->AddItem(_W("120 Hz"));
+		mpCBSimulationRate->AddItem(_W("144 Hz"));
+		mpCBSimulationRate->AddItem(_W("240 Hz"));
 
 		vPosInGroup.x += mpCBResolution->GetSize().x + 100;
 
@@ -483,6 +533,9 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 
 		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10,0), 0, kTranslate("OptionsMenu","VSync"), pGroup);
 		SetUpInput(NULL, mpChBVSync, false, kTranslate("OptionsMenu","VSyncTip"));
+
+		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10+mpChBVSync->GetSize().y+10,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
+		SetUpInput(NULL, mpChBUncapFPS, false, GetOptionsMenuString("UncapFPSTip", _W("Render as fast as possible instead of locking the game to 60 FPS.")));
 
 
 //		mpChBAdaptiveVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(mpChBVSync->GetSize().x+10,mpChBFullScreen->GetSize().y+10,0), 0, kTranslate("OptionsMenu","AdaptiveVSync"), pGroup);
@@ -538,8 +591,12 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		//pLInstr->SetDefaultFontSize(12);
 	}
 
-	mpCBResolution->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
+	mpCBResolution->SetFocusNavigation(eUIArrow_Down, mpCBSimulationRate);
 	mpCBResolution->SetFocusNavigation(eUIArrow_Right, mpChBFullScreen);
+
+	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Up, mpCBResolution);
+	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Right, mpChBUncapFPS);
+	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 
 	mpChBFullScreen->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
 	mpChBFullScreen->SetFocusNavigation(eUIArrow_Down, mpChBVSync);
@@ -547,13 +604,17 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	mpChBVSync->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
 //	mpChBVSync->SetFocusNavigation(eUIArrow_Right, mpChBAdaptiveVSync);
 	mpChBVSync->SetFocusNavigation(eUIArrow_Up, mpChBFullScreen);
-	mpChBVSync->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
+	mpChBVSync->SetFocusNavigation(eUIArrow_Down, mpChBUncapFPS);
+
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Left, mpCBSimulationRate);
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Up, mpChBVSync);
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 	
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Left, mpChBVSync);
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Up, mpChBFullScreen);
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 
-	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Up, mpCBResolution);
+	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Up, mpCBSimulationRate);
 	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Down, mpSGamma);
 
 	mpSGamma->SetFocusNavigation(eUIArrow_Up, mpCBTextureSizeLevel);
@@ -1164,6 +1225,8 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		mpChBFullScreen->SetChecked(aObj.GetVarBool("FullScreen"), false);
 		mpChBVSync->SetChecked(aObj.GetVarBool("VSync"), false);
 //		mpChBAdaptiveVSync->SetChecked(aObj.GetVarBool("AdaptiveVsync"), false);
+		mpChBUncapFPS->SetChecked(aObj.GetVarBool("UncapFPS"), false);
+		mpCBSimulationRate->SetSelectedItem(GetIndexFromSimulationRate(aObj.GetVarInt("SimulationRate", 60)), false, false);
 
 		/////////////////////////
 		// Texture quality and filtering
@@ -1444,7 +1507,11 @@ void cLuxMainMenu_Options::ApplyChanges()
 		pCfgHdr->mbFullscreen = bFullscreen;
 		pCfgHdr->mbVSync = mpChBVSync->IsChecked();
 //		pCfgHdr->mbAdaptiveVSync = mpChBAdaptiveVSync->IsChecked();
+		pCfgHdr->mbUncapFPS = mpChBUncapFPS->IsChecked();
+		pCfgHdr->mlSimulationRate = GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem());
 		pGfx->GetLowLevel()->SetVsyncActive(pCfgHdr->mbVSync, pCfgHdr->mbAdaptiveVSync);
+		gpBase->mpEngine->SetLimitFPS(pCfgHdr->mbUncapFPS == false);
+		gpBase->mpEngine->SetUpdatesPerSec(pCfgHdr->mlSimulationRate);
 		pGfx->GetLowLevel()->SetGammaCorrection(GetGamma());
 
 		if(bResolutionChanged)
@@ -1773,6 +1840,8 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("FullScreen", gpBase->mpConfigHandler->mbFullscreen);
 		aObj.AddVarBool("VSync", gpBase->mpConfigHandler->mbVSync);
 		aObj.AddVarBool("AdaptiveVsync", gpBase->mpConfigHandler->mbAdaptiveVSync);
+		aObj.AddVarBool("UncapFPS", gpBase->mpConfigHandler->mbUncapFPS);
+		aObj.AddVarInt("SimulationRate", gpBase->mpConfigHandler->mlSimulationRate);
 		
 		/////////////////////////
 		// Texture quality and filtering
@@ -1868,6 +1937,8 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		// Fullscreen & vsync
 		aObj.AddVarBool("FullScreen",	mpChBFullScreen->IsChecked());
 		aObj.AddVarBool("VSync",		mpChBVSync->IsChecked());
+		aObj.AddVarBool("UncapFPS",		mpChBUncapFPS->IsChecked());
+		aObj.AddVarInt("SimulationRate", GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem()));
 		
 		/////////////////////////
 		// Texture quality and filtering
@@ -1947,6 +2018,21 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 
 bool cLuxMainMenu_Options::Window_OnUpdate(iWidget* apWidget, const cGuiMessageData& aData)
 {
+	///////////////////////////////////////////////////
+	if(mbSimRateWarningPending)
+	{
+		mbSimRateWarningPending = false;
+		if(mpGuiSet->PopUpIsActive()==false)
+		{
+			cGuiPopUpMessageBox* pPopUp = mpGuiSet->CreatePopUpMessageBox(
+					GetOptionsMenuString("SimulationRateWarningLabel", _W("High Simulation Rate")),
+					GetOptionsMenuString("SimulationRateWarningMessage", _W("Raising the simulation rate above 60 Hz can heavily impact performance.")),
+					kTranslate("MainMenu","OK"), _W(""),
+					this, kGuiCallback(SimulationRateWarningCallback));
+			pPopUp->GetGuiSet()->SetDrawFocus(true);
+		}
+	}
+
 	///////////////////////////////////////////////////
 	// If there is a popup active, dont update tips
 	if(mpGuiSet->PopUpIsActive())
@@ -2263,6 +2349,30 @@ bool cLuxMainMenu_Options::MessageBoxCallback(iWidget* apWidget, const cGuiMessa
 	return true;
 }
 kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, MessageBoxCallback);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::SimulationRate_OnChange(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	if(mbSettingInitialValues) return true;
+
+	int lRate = GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem());
+	if(lRate > 60)
+	{
+		mbSimRateWarningPending = true;
+	}
+
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, SimulationRate_OnChange);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::SimulationRateWarningCallback(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, SimulationRateWarningCallback);
 
 //-----------------------------------------------------------------------
 

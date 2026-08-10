@@ -1152,7 +1152,8 @@ bool cLuxBase::InitEngine()
 	float fGamma = mpMainConfig->GetFloat("Graphics","Gamma", 1.0f);
 	mpEngine->GetGraphics()->GetLowLevel()->SetGammaCorrection(fGamma);
 	
-	mpEngine->SetLimitFPS(mpMainConfig->GetBool("Engine","LimitFPS", false));
+	mpEngine->SetLimitFPS(mpConfigHandler->mbUncapFPS == false);
+	mpEngine->SetUpdatesPerSec(mpConfigHandler->mlSimulationRate);
 	mpEngine->SetWaitIfAppOutOfFocus(mpMainConfig->GetBool("Engine","SleepWhenOutOfFocus", true));
 
 	cMaterialManager* pMatMgr = mpEngine->GetResources()->GetMaterialManager();

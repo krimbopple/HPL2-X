@@ -1247,6 +1247,8 @@ namespace hpl {
 		if(mbDrawMouse == abX) return;
 
 		mbDrawMouse = abX;
+
+		mpGraphics->GetLowLevel()->ShowCursor(abX);
 	}
 
 	//-----------------------------------------------------------------------

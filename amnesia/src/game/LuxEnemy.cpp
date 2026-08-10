@@ -1182,7 +1182,7 @@ float iLuxEnemy::DrawDebug(cGuiSet *apSet,iFontData *apFont,float afStartY)
 
 	apSet->DrawFont(apFont, cVector3f(5,afStartY,10),13,cColor(1,1), 
 		_W("  DistToPlayer: %f PlayerDirAmount: %f CurrentPatrolNode: %d MoverSpeedMul: %f"), DistToPlayer(), GetPlayerMovementTowardEnemyAmount(), 
-						mlCurrentPatrolNode, mpMover->CalculateSpeedMul(1.0f/60.0f));
+						mlCurrentPatrolNode, mpMover->CalculateSpeedMul(gpBase->mpEngine->GetStepSize()));
 	afStartY += 14;
 
 	//apSet->DrawFont(apFont, cVector3f(5,afStartY,10),13,cColor(1,1), 

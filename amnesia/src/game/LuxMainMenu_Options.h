@@ -152,6 +152,8 @@ private:
 	cWidgetCheckBox *mpChBFullScreen;
 	cWidgetCheckBox *mpChBVSync;
 //	cWidgetCheckBox *mpChBAdaptiveVSync;
+	cWidgetCheckBox *mpChBUncapFPS;
+	cWidgetComboBox *mpCBSimulationRate;
 
 	cWidgetComboBox *mpCBTextureSizeLevel;
 
@@ -242,6 +244,8 @@ private:
 
 	bool mbSettingInitialValues;
 
+	bool mbSimRateWarningPending;
+
 	bool mbKeyConfigOpen;
 
 	tVideoModeVec mvScreenSizes;
@@ -294,6 +298,12 @@ private:
 
 	bool MessageBoxCallback(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(MessageBoxCallback);
+
+	bool SimulationRate_OnChange(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(SimulationRate_OnChange);
+
+	bool SimulationRateWarningCallback(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(SimulationRateWarningCallback);
 };
 
 //----------------------------------------------
