@@ -157,11 +157,14 @@ namespace hpl {
 		}
 		else
 		{
-			// Get the amount of blur depending frame time.
-			//*30 is just so that good amount values are still between 0 - 1
+			// Make the trail last the same real time regardless of FPS.
+			//float fFrameTime = mpCurrentComposite->GetCurrentFrameTime();
+			//float fPow = (1.0f / fFrameTime) * mParams.mfAmount; //The higher this is, the more blur!
+			//float fAmount = exp(-fPow * 0.015f);
 			float fFrameTime = mpCurrentComposite->GetCurrentFrameTime();
-			float fPow = (1.0f / fFrameTime) * mParams.mfAmount; //The higher this is, the more blur!
-			float fAmount = exp(-fPow * 0.015f); 
+			if(fFrameTime < 0.0001f) fFrameTime = 1.0f/60.0f;
+			float fAmount60 = exp(-0.9f * mParams.mfAmount);
+			float fAmount = 1.0f - pow(1.0f - fAmount60, fFrameTime * 60.0f);
 			if(mpImageTrailType->mpProgram)
 				mpImageTrailType->mpProgram->SetFloat(kVar_afAlpha, fAmount);
 		}
