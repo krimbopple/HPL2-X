@@ -358,6 +358,8 @@ namespace hpl {
 		Log(" Setting up OpenGL\n");
 		SetupGL();
 
+		SetMultisamplingActive(true);
+
 #if SDL_VERSION_ATLEAST(2, 0, 0)
         SDL_GL_SwapWindow(mpScreen);
 #else

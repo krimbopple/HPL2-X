@@ -52,18 +52,30 @@ namespace hpl {
 		mpCallback = apCallback;
 		mpCallbackObject = apCallbackObject;
 
+		// Scale the message box with the virtual size so popups aren't tiny on widescreen monitors
+		// Bit of a workaround, but ingame sets are a fixed space so they stay normal !
+		float fScale = mpSet->GetVirtualSize().y / 600.0f;
+		if(fScale < 1.0f) fScale = 1.0f;
+		if(fScale > 2.0f) fScale = 2.0f;
+
 		cGuiSkinFont *pFont = mpSkin->GetFont(eGuiSkinFont_Default);
-		
+		cGuiSkinFont *pWindowFont = mpSkin->GetFont(eGuiSkinFont_WindowLabel);
+
+		cVector2f vOrigFontSize = pFont->mvSize;
+		cVector2f vOrigWindowFontSize = pWindowFont->mvSize;
+		pFont->mvSize = vOrigFontSize * fScale;
+		pWindowFont->mvSize = vOrigWindowFontSize * fScale;
+
 		float fWindowMinLength = pFont->mpFont->GetLength(pFont->mvSize,asLabel.c_str());
 		float fTextLength = pFont->mpFont->GetLength(pFont->mvSize,asText.c_str());
 
 		if(fTextLength > fWindowMinLength) fWindowMinLength = fTextLength;
 
-		float fWindowWidth = fWindowMinLength+40 > 200 ? fWindowMinLength+40 : 200;
+		float fWindowWidth = fWindowMinLength+40*fScale > 200*fScale ? fWindowMinLength+40*fScale : 200*fScale;
 
 		cVector2f vVirtSize = mpSet->GetVirtualSize();
 
-		float fWindowHeight = 90 + pFont->mvSize.y;
+		float fWindowHeight = 90*fScale + pFont->mvSize.y;
 		
 		cVector3f vPos = cVector3f(vVirtSize.x/2 - fWindowWidth/2,vVirtSize.y/2- fWindowHeight/2,100);
 
@@ -77,8 +89,8 @@ namespace hpl {
 		// Buttons
 		if(asButton2 == _W(""))
 		{
-			vPos = cVector3f(fWindowWidth/2 - 40, 50 + pFont->mvSize.y,1);
-			mvButtons[0] = mpSet->CreateWidgetButton(vPos,cVector2f(80,30),asButton1,mpWindow);
+			vPos = cVector3f(fWindowWidth/2 - 40*fScale, 50*fScale + pFont->mvSize.y,1);
+			mvButtons[0] = mpSet->CreateWidgetButton(vPos,cVector2f(80*fScale,30*fScale),asButton1,mpWindow);
 			mvButtons[0]->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(ButtonPress));
 			mvButtons[0]->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(GamepadButtonPress));
 			mvButtons[0]->SetGlobalUIInputListener(true);
@@ -87,14 +99,14 @@ namespace hpl {
 		}
 		else
 		{
-			vPos = cVector3f(fWindowWidth/2 - (80*2+20)/2, 50 + pFont->mvSize.y,1);
-			mvButtons[0] = mpSet->CreateWidgetButton(vPos,cVector2f(80,30),asButton1,mpWindow);
+			vPos = cVector3f(fWindowWidth/2 - (80*fScale*2+20*fScale)/2, 50*fScale + pFont->mvSize.y,1);
+			mvButtons[0] = mpSet->CreateWidgetButton(vPos,cVector2f(80*fScale,30*fScale),asButton1,mpWindow);
 			mvButtons[0]->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(ButtonPress));
 			mvButtons[0]->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(GamepadButtonPress));
 			mvButtons[0]->SetGlobalUIInputListener(true);
 
-			vPos.x += 80+20;
-			mvButtons[1] = mpSet->CreateWidgetButton(vPos,cVector2f(80,30),asButton2,mpWindow);
+			vPos.x += 80*fScale+20*fScale;
+			mvButtons[1] = mpSet->CreateWidgetButton(vPos,cVector2f(80*fScale,30*fScale),asButton2,mpWindow);
 			mvButtons[1]->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(ButtonPress));
 			mvButtons[1]->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(GamepadButtonPress));
 			mvButtons[1]->SetGlobalUIInputListener(true);
@@ -108,11 +120,14 @@ namespace hpl {
 		
 		//////////////////////////
 		// Label
-		vPos = cVector3f(20, 30,1);
-		mpLabel = mpSet->CreateWidgetLabel(vPos,cVector2f(fWindowWidth-10,pFont->mvSize.y),
+		vPos = cVector3f(20*fScale, 30*fScale,1);
+		mpLabel = mpSet->CreateWidgetLabel(vPos,cVector2f(fWindowWidth-10*fScale,pFont->mvSize.y),
 											asText,mpWindow);
 
 		SetUpDefaultFocus(mvButtons[0]);
+
+		pFont->mvSize = vOrigFontSize;
+		pWindowFont->mvSize = vOrigWindowFontSize;
 	}
 
 	//-----------------------------------------------------------------------

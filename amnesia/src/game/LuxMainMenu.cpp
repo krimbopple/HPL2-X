@@ -915,6 +915,14 @@ void cLuxMainMenu::CreateGui()
 
 	//////////////////////
 	// Create the windows
+	float fWindowScale = LuxCalcGuiWindowScale();
+	cVector2f vDefaultFontSize = mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Default)->mvSize;
+	cVector2f vDisabledFontSize = mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Disabled)->mvSize;
+	cVector2f vWindowLabelFontSize = mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_WindowLabel)->mvSize;
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Default)->mvSize = vDefaultFontSize * fWindowScale;
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Disabled)->mvSize = vDisabledFontSize * fWindowScale;
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_WindowLabel)->mvSize = vWindowLabelFontSize * fWindowScale;
+
 	for(size_t i=0; i<mvWindows.size(); ++i)
 	{
 		iLuxMainMenuWindow *pWindow = mvWindows[i];
@@ -923,6 +931,10 @@ void cLuxMainMenu::CreateGui()
 			pWindow->SetActive(false);
 		}
 	}
+
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Default)->mvSize = vDefaultFontSize;
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_Disabled)->mvSize = vDisabledFontSize;
+	mpGuiSet->GetSkin()->GetFont(eGuiSkinFont_WindowLabel)->mvSize = vWindowLabelFontSize;
 
 	mbGuiCreated = true;
 }

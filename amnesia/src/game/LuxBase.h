@@ -79,6 +79,11 @@ extern void LuxCalcGuiSetOffset(const cVector2f &avVirtualSizeIn, const cVector2
 */
 extern void LuxCalcGuiSetScreenOffset(const cVector2f &avVirtualSizeIn, cVector2f& avOutSize, cVector2f & avOutOffset);
 
+/**
+* Returns uniform scale factor for the menu popup windows so they keep a proportional size on widescreen displays
+*/
+extern float LuxCalcGuiWindowScale();
+
 
 extern void ProgLog(eLuxProgressLogLevel aLevel, const tString& asMessage);
 

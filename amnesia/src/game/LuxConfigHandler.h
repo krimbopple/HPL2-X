@@ -52,6 +52,7 @@ public:
 	cVector2l mvScreenSize;
     int mlDisplay;
 	bool mbFullscreen;
+	int mlMultisampling;
 	bool mbVSync;
 	bool mbAdaptiveVSync;
 	bool mbUncapFPS;

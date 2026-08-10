@@ -897,7 +897,7 @@ kGuiCallbackDeclaredFuncEnd(cLuxInputMenuEntry, InputEntryGamepadButtonPress);
 
 cLuxMainMenu_KeyConfig::cLuxMainMenu_KeyConfig(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(620,460);
+	mvWindowSize = cVector2f(620,460) * LuxCalcGuiWindowScale();
 	mpWaitingInput = NULL;
 
 	mpCurrentTipEntry = NULL;
@@ -931,12 +931,13 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 	mpWindow = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_None,cVector3f(0,0,5),mvWindowSize,kTranslate("KeyConfig","KeyConfigTitle"));
 	mpWindow->AddCallback(eGuiMessage_OnUpdate, this, kGuiCallback(WindowOnUpdate));
 
-	float fHeaderSize = 70;
-	float fBorderSize = 15;
+	float fScale = LuxCalcGuiWindowScale();
+	float fHeaderSize = 70 * fScale;
+	float fBorderSize = 15 * fScale;
 	float fHeaderFontMul = 1.25f;
-	mvEntrySize = cVector2f(140.0f, 16.0f);
-	mfEntrySep = 10.0f;
-	mvHeaderPositions.x = 240.0f;
+	mvEntrySize = cVector2f(140.0f, 16.0f) * fScale;
+	mfEntrySep = 10.0f * fScale;
+	mvHeaderPositions.x = 240.0f * fScale;
 	mvHeaderPositions.y = mvHeaderPositions.x +mvEntrySize.x+mfEntrySep;
 
 	//////////////////////////
@@ -947,7 +948,7 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 	pLabel->SetDefaultFontSize(pLabel->GetDefaultFontSize()*fHeaderFontMul);
 	pLabel->SetAutogenerateSize(true);
 
-	mpCBCategory = mpGuiSet->CreateWidgetComboBox(cVector3f(pLabel->GetSize().x + 10, 0 ,0), cVector2f(175,25), _W(""), pGroup);
+	mpCBCategory = mpGuiSet->CreateWidgetComboBox(cVector3f(pLabel->GetSize().x + 10*fScale, 0 ,0), cVector2f(175*fScale,25*fScale), _W(""), pGroup);
 	mpCBCategory->AddItem(kTranslate("KeyConfig","Movement"));
 	mpCBCategory->AddItem(kTranslate("KeyConfig","Actions"));
 	mpCBCategory->AddItem(kTranslate("KeyConfig","Misc"));
@@ -957,7 +958,7 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 
 	/////////////////////////////////////////////////////
 	// Input panes
-	vPos = pGroup->GetLocalPosition() + cVector3f(fBorderSize, pGroup->GetSize().y + 5.0f, 0);
+	vPos = pGroup->GetLocalPosition() + cVector3f(fBorderSize, pGroup->GetSize().y + 5.0f*fScale, 0);
 
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("KeyConfig", "HeaderAction"), mpWindow);
 	pLabel->SetDefaultFontSize(pLabel->GetDefaultFontSize()*fHeaderFontMul);
@@ -970,7 +971,7 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 	pLabel->SetDefaultFontSize(pLabel->GetDefaultFontSize()*fHeaderFontMul);
 	pLabel->SetTextAlign(eFontAlign_Center);
 
-	vPos.y += pLabel->GetSize().y+10;
+	vPos.y += pLabel->GetSize().y+10*fScale;
 
 	/////////////////////////
 	//Key groups
@@ -999,7 +1000,7 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 			cLuxInputMenuEntry* pEntry = CreateInputEntry(pLuxAction, pGroup, vPosInGroup);
 			vInputs.push_back(pEntry);
 
-			vPosInGroup.y += pEntry->mvLKeyInputs[0]->GetSize().y + 10;
+			vPosInGroup.y += pEntry->mvLKeyInputs[0]->GetSize().y + 10*fScale;
 		}
 
 		// Set up focus navigation
@@ -1034,13 +1035,13 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 
 	//////////////////////////
 	//Buttons
-	float fButtonWidth = 80;
-	float fButtonSepp = 3;
-	vPos.x = 30;
-	vPos.y = mpWindow->GetSize().y - 25 - 10;
+	float fButtonWidth = 80 * fScale;
+	float fButtonSepp = 3 * fScale;
+	vPos.x = 30 * fScale;
+	vPos.y = mpWindow->GetSize().y - 25*fScale - 10*fScale;
 
 	//Tip Label
-	mpLTip = mpGuiSet->CreateWidgetLabel(vPos + cVector3f(10,0,0), cVector2f(400,30), _W(""), mpWindow);
+	mpLTip = mpGuiSet->CreateWidgetLabel(vPos + cVector3f(10*fScale,0,0), cVector2f(400*fScale,30*fScale), _W(""), mpWindow);
 	mpLTip->SetDefaultFontColor(cColor(1,1));
 	mpLTip->SetWordWrap(true);
 	mpLTip->SetClipActive(true);
@@ -1049,21 +1050,21 @@ void cLuxMainMenu_KeyConfig::CreateGui()
 	mpLTip->SetBackGroundColor(cColor(0, 0.5f));
 
 	//Set default keys
-	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(vPos + cVector3f(10,-35,0), cVector2f(fButtonWidth,25), kTranslate("KeyConfig","SetDefault"), mpWindow);
+	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(vPos + cVector3f(10*fScale,-35*fScale,0), cVector2f(fButtonWidth,25*fScale), kTranslate("KeyConfig","SetDefault"), mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressSetDefault));
 	float fSetDefaultsWidth = pButton->GetDefaultFontType()->GetLength(pButton->GetDefaultFontSize(), pButton->GetText().c_str());
-	pButton->SetSize(cVector2f(fSetDefaultsWidth+20, pButton->GetSize().y));
+	pButton->SetSize(cVector2f(fSetDefaultsWidth+20*fScale, pButton->GetSize().y));
 	mpBDefaultKeys = pButton;
 
 
 	//Save changes
-	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5;
-	mpBOK = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","OK"),mpWindow);
+	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5*fScale;
+	mpBOK = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","OK"),mpWindow);
 	mpBOK->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressOK));
 
 	//Cancel
 	vPos.x += fButtonWidth + fButtonSepp;
-	mpBCancel = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","Cancel"),mpWindow);
+	mpBCancel = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","Cancel"),mpWindow);
 	mpBCancel->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressCancel));
 	mpBCancel->AddCallback(eGuiMessage_UIButtonPress, this, kGuiCallback(UIPressCancel));
 	mpBCancel->SetGlobalUIInputListener(true);

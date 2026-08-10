@@ -34,7 +34,7 @@
 
 cLuxMainMenu_CustomStory::cLuxMainMenu_CustomStory(cGuiSet* apGuiSet, cGuiSkin* apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(600,440);
+	mvWindowSize = cVector2f(600,440) * LuxCalcGuiWindowScale();
 
 	mpStory = NULL;
 }
@@ -60,15 +60,16 @@ void cLuxMainMenu_CustomStory::CreateGui()
 	mpWindow = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_None,cVector3f(0,0,5),mvWindowSize, _W(""));
 	//mpWindow->AddCallback(eGuiMessage_OnUpdate, this, kGuiCallback(WindowOnUpdate));
 
-	float fBorderSize = 15;
-	cVector3f vPos = cVector3f(fBorderSize, 60+fBorderSize, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos = cVector3f(fBorderSize, 60*fScale+fBorderSize, 0.1f);
 
-	mpIPicture = mpGuiSet->CreateWidgetImage("", cVector3f(6,75,0.05f), cVector2f(588,360), eGuiMaterial_Alpha, false, mpWindow);
+	mpIPicture = mpGuiSet->CreateWidgetImage("", cVector3f(6*fScale,75*fScale,0.05f), cVector2f(588*fScale,360*fScale), eGuiMaterial_Alpha, false, mpWindow);
 	mpIPicture->SetColorMul(cColor(1,0.65f));
 	
-	mpLAuthor = mpGuiSet->CreateWidgetLabel(vPos+cVector3f(50,-50,0), 0, _W(" "), mpWindow);
-	cWidgetFrame* pFDescription = mpGuiSet->CreateWidgetFrame(vPos + cVector3f(0,10,0), cVector2f(420,345), false, mpWindow, false, true);
-	mpLDesc = mpGuiSet->CreateWidgetLabel(0, pFDescription->GetSize()-cVector2f(20,10), _W(""), pFDescription);
+	mpLAuthor = mpGuiSet->CreateWidgetLabel(vPos+cVector3f(50*fScale,-50*fScale,0), 0, _W(" "), mpWindow);
+	cWidgetFrame* pFDescription = mpGuiSet->CreateWidgetFrame(vPos + cVector3f(0,10*fScale,0), cVector2f(420*fScale,345*fScale), false, mpWindow, false, true);
+	mpLDesc = mpGuiSet->CreateWidgetLabel(0, pFDescription->GetSize()-cVector2f(20*fScale,10*fScale), _W(""), pFDescription);
 	mpLDesc->SetWordWrap(true);
 
 	mvButtons.clear();
@@ -80,7 +81,7 @@ void cLuxMainMenu_CustomStory::CreateGui()
 	vLabels.push_back(kTranslate("Global","Cancel"));
 
 	float fButtonWidth = 0;
-	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(0,cVector2f(fButtonWidth,30),_W(""), mpWindow);
+	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(0,cVector2f(fButtonWidth,30*fScale),_W(""), mpWindow);
 
 	//////////////////////////////////////////////////////////////
 	// Get longest label string and set button width accordingly
@@ -96,14 +97,14 @@ void cLuxMainMenu_CustomStory::CreateGui()
 	
 	//////////////////////////
 	//Buttons
-	fButtonWidth += 20.0f;
-	float fButtonHeight = 30.0f;
-	float fButtonSepp = 3;
+	fButtonWidth += 20.0f*fScale;
+	float fButtonHeight = 30.0f * fScale;
+	float fButtonSepp = 3 * fScale;
 
 	bool bSaveGameExists = gpBase->mpSaveHandler->SaveFileExists();
 
-	vPos.x = mpWindow->GetSize().x - fButtonWidth-fButtonSepp-5;
-	vPos.y = mpWindow->GetSize().y*0.5f - 25 - 10;
+	vPos.x = mpWindow->GetSize().x - fButtonWidth-fButtonSepp-5*fScale;
+	vPos.y = mpWindow->GetSize().y*0.5f - 25*fScale - 10*fScale;
 
 	//Continue
 	pButton->SetPosition(vPos);
@@ -318,7 +319,7 @@ kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_CustomStory, PressBack);
 
 cLuxMainMenu_CustomStoryList::cLuxMainMenu_CustomStoryList(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin, cLuxMainMenu_CustomStory* apWindow) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(600,440);
+	mvWindowSize = cVector2f(600,440) * LuxCalcGuiWindowScale();
 
 	mpStoryWindow = apWindow;
 }
@@ -344,30 +345,31 @@ void cLuxMainMenu_CustomStoryList::CreateGui()
 	mpWindow = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_None,cVector3f(0,0,5),mvWindowSize,kTranslate("MainMenu","Custom Map"));
 	mpWindow->AddCallback(eGuiMessage_OnUpdate, this, kGuiCallback(WindowOnUpdate));
 
-	float fBorderSize = 15;
-	cVector3f vPos = cVector3f(fBorderSize, 60+fBorderSize, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos = cVector3f(fBorderSize, 60*fScale+fBorderSize, 0.1f);
 
 	//////////////////////////
 	//Custom story list
-	mpLBStories = mpGuiSet->CreateWidgetListBox(vPos+cVector3f(0,0,1), cVector2f((mvWindowSize.x-fBorderSize*2),300), mpWindow);
+	mpLBStories = mpGuiSet->CreateWidgetListBox(vPos+cVector3f(0,0,1), cVector2f((mvWindowSize.x-fBorderSize*2),300*fScale), mpWindow);
 	mpLBStories->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(SelectStory));
 	mpLBStories->AddCallback(eGuiMessage_SelectionDoubleClick, this, kGuiCallback(PressOK));
 
 	//////////////////////////
 	//Buttons
-	float fButtonWidth = 80;
-	float fButtonSepp = 3;
+	float fButtonWidth = 80 * fScale;
+	float fButtonSepp = 3 * fScale;
 
-	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5;
-	vPos.y = mpWindow->GetSize().y - 25 - 10;
+	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5*fScale;
+	vPos.y = mpWindow->GetSize().y - 25*fScale - 10*fScale;
 
 	//Start
-	cWidgetButton* pButton  = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","OK"),mpWindow);
+	cWidgetButton* pButton  = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","OK"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressOK));
 
 	//Cancel
 	vPos.x += fButtonWidth + fButtonSepp;
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","Cancel"),mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","Cancel"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressCancel));
 }
 

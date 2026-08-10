@@ -136,13 +136,13 @@ void LuxCalcGuiSetOffset(const cVector2f &avVirtualSizeIn, const cVector2f& avSc
 
 	if(fScreenRatio >= (4.0f / 3.0f)-0.001f)
 	{
-		float fAddX = avVirtualSizeIn.x * (fScreenRatio-fWantedRatio); //The "left overs" on both sides
+		float fWantedSizeX = avVirtualSizeIn.x * (fScreenRatio / fWantedRatio);
 	//avOutSize.y = avVirtualSizeIn.y + fAddY;
 
-		avOutSize.x = avVirtualSizeIn.x + fAddX;
+		avOutSize.x = fWantedSizeX;
 		avOutSize.y = avVirtualSizeIn.y;
 
-		avOutOffset.x = fAddX*0.5f;
+		avOutOffset.x = (avOutSize.x - avVirtualSizeIn.x)*0.5f;
 		avOutOffset.y =0;
 	}
 	else
@@ -156,6 +156,16 @@ void LuxCalcGuiSetOffset(const cVector2f &avVirtualSizeIn, const cVector2f& avSc
 void LuxCalcGuiSetScreenOffset(const cVector2f &avVirtualSizeIn, cVector2f& avOutSize, cVector2f & avOutOffset)
 {
 	LuxCalcGuiSetOffset(avVirtualSizeIn, gpBase->mpEngine->GetGraphics()->GetLowLevel()->GetScreenSizeFloat(), avOutSize, avOutOffset);
+}
+
+//-----------------------------------------------------------------------
+
+float LuxCalcGuiWindowScale()
+{
+	float fScale = gpBase->mpEngine->GetGraphics()->GetLowLevel()->GetScreenSizeFloat().y / 600.0f;
+	if(fScale < 1.0f) fScale = 1.0f;
+	if(fScale > 2.0f) fScale = 2.0f;
+	return fScale;
 }
 
 //-----------------------------------------------------------------------
@@ -1104,6 +1114,7 @@ bool cLuxBase::InitEngine()
 	vars.mGraphics.mvScreenSize =  mpConfigHandler->mvScreenSize;
 	vars.mGraphics.mlDisplay = mpConfigHandler->mlDisplay;
 	vars.mGraphics.mbFullscreen =  mpConfigHandler->mbFullscreen;
+	vars.mGraphics.mlMultisampling = mpConfigHandler->mlMultisampling;
 	vars.mGraphics.msWindowCaption = msGameName + " Loading...";
 
 	vars.mSound.mlSoundDeviceID = mpConfigHandler->mlSoundDevID;

@@ -79,6 +79,7 @@ void cLuxConfigHandler::LoadMainConfig()
 	mvScreenSize.y =	gpBase->mpMainConfig->GetInt("Screen","Height", 600);
     mlDisplay =			gpBase->mpMainConfig->GetInt("Screen","Display", 0);
 	mbFullscreen =		gpBase->mpMainConfig->GetBool("Screen","FullScreen", false);
+	mlMultisampling =	gpBase->mpMainConfig->GetInt("Graphics","MSAA", 0);
 	mbVSync =			gpBase->mpMainConfig->GetBool("Screen","Vsync", false);
 	mbAdaptiveVSync =	gpBase->mpMainConfig->GetBool("Screen","AdaptiveVsync", false);
 
@@ -153,6 +154,7 @@ void cLuxConfigHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetInt("Screen","Width", mvScreenSize.x);
 	gpBase->mpMainConfig->SetInt("Screen","Height", mvScreenSize.y);
 	gpBase->mpMainConfig->SetBool("Screen","FullScreen", mbFullscreen);
+	gpBase->mpMainConfig->SetInt("Graphics","MSAA", mlMultisampling);
 	gpBase->mpMainConfig->SetBool("Screen","Vsync", mbVSync);
 
 	gpBase->mpMainConfig->SetBool("MapLoad","FastPhysicsLoad", mbFastPhysicsLoad);

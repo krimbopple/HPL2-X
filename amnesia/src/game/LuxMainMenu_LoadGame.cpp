@@ -36,7 +36,7 @@
 
 cLuxMainMenu_LoadGame::cLuxMainMenu_LoadGame(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(600,440);
+	mvWindowSize = cVector2f(600,440) * LuxCalcGuiWindowScale();
 }
 
 //-----------------------------------------------------------------------
@@ -60,12 +60,13 @@ void cLuxMainMenu_LoadGame::CreateGui()
 	mpWindow = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_None,cVector3f(0,0,5),mvWindowSize,kTranslate("LoadGame","LoadGameTitle"));
 	mpWindow->AddCallback(eGuiMessage_OnUpdate, this, kGuiCallback(WindowOnUpdate));
 
-	float fBorderSize = 15;
-	cVector3f vPos = cVector3f(fBorderSize, 60+fBorderSize, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos = cVector3f(fBorderSize, 60*fScale+fBorderSize, 0.1f);
 
 	//////////////////////////
 	//Saved game list
-	mpLBSavedGames = mpGuiSet->CreateWidgetListBox(vPos+cVector3f(0,0,1), cVector2f(mvWindowSize.x-fBorderSize*2,300), mpWindow);
+	mpLBSavedGames = mpGuiSet->CreateWidgetListBox(vPos+cVector3f(0,0,1), cVector2f(mvWindowSize.x-fBorderSize*2,300*fScale), mpWindow);
 	mpLBSavedGames->AddCallback(eGuiMessage_SelectionDoubleClick, this, kGuiCallback(PressOK));
 	mpLBSavedGames->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(LoadSelectionClickChange));
 	mpLBSavedGames->AddCallback(eGuiMessage_GetUINavFocus, this, kGuiCallback(LockLoadList));
@@ -74,20 +75,20 @@ void cLuxMainMenu_LoadGame::CreateGui()
 
 	////////////////////////////////
 	//Saved game snapshot container
-	mpISavedGameSnapShot = mpGuiSet->CreateWidgetImage("", mpLBSavedGames->GetSize().x+10, cVector2f(200), eGuiMaterial_Alpha, false, mpLBSavedGames);
+	mpISavedGameSnapShot = mpGuiSet->CreateWidgetImage("", mpLBSavedGames->GetSize().x+10*fScale, cVector2f(200*fScale), eGuiMaterial_Alpha, false, mpLBSavedGames);
 
 	//////////////////////////
 	//Buttons
-	float fButtonWidth = 80;
-	float fButtonSepp = 3;
+	float fButtonWidth = 80 * fScale;
+	float fButtonSepp = 3 * fScale;
 
-	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5;
-	vPos.y = mpWindow->GetSize().y - 25 - 10;
+	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5*fScale;
+	vPos.y = mpWindow->GetSize().y - 25*fScale - 10*fScale;
 
 	std::vector<iWidget*> vButtons;
 
 	// Load Game
-	cWidgetButton* pButton  = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","OK"),mpWindow);
+	cWidgetButton* pButton  = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","OK"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressOK));
 	pButton->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(UIPress));
 	mpLoadButton = pButton;
@@ -95,7 +96,7 @@ void cLuxMainMenu_LoadGame::CreateGui()
 
 	//Cancel
 	vPos.x += fButtonWidth + fButtonSepp;
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("Global","Cancel"),mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("Global","Cancel"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressCancel));
 	pButton->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(UIPressCancel));
 	vButtons.push_back(pButton);

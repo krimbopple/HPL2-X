@@ -32,7 +32,7 @@
 
 cLuxMainMenu_StartGame::cLuxMainMenu_StartGame(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(400, 220);
+	mvWindowSize = cVector2f(400, 220) * LuxCalcGuiWindowScale();
 #if MAC_OS || LINUX
 	mpStartButton = 0;
 #else
@@ -61,21 +61,22 @@ void cLuxMainMenu_StartGame::CreateGui()
 	mpWindow = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_None,cVector3f(0,0,5),mvWindowSize, kTranslate("MainMenu", "Start Game"));
 	mpWindow->AddCallback(eGuiMessage_OnUpdate, this, kGuiCallback(WindowOnUpdate));
 
-	float fBorderSize = 15;
-	cVector3f vPos = cVector3f(fBorderSize, 60+fBorderSize, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos = cVector3f(fBorderSize, 60*fScale + fBorderSize, 0.1f);
 
 	//////////////////////////
 	//Buttons
-	float fButtonWidth = 120;
-	float fButtonSepp = 3;
+	float fButtonWidth = 120 * fScale;
+	float fButtonSepp = 3 * fScale;
 
 	std::vector<iWidget*> vButtons;
 
 	vPos.x = (mvWindowSize.x ) - ((fButtonWidth * 2.0f) + fButtonSepp * 4);
-	vPos.y = mpWindow->GetSize().y - 35;
+	vPos.y = mpWindow->GetSize().y - 35*fScale;
 
 	// Start Game
-	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(vPos, cVector2f(fButtonWidth * 2.0f + fButtonSepp, 30), kTranslate("MainMenu", "Start Game"), mpWindow);
+	cWidgetButton* pButton = mpGuiSet->CreateWidgetButton(vPos, cVector2f(fButtonWidth * 2.0f + fButtonSepp, 30*fScale), kTranslate("MainMenu", "Start Game"), mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressStartGame));
 	pButton->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(UIPressStart));
 	mpStartButton = pButton;
@@ -84,13 +85,13 @@ void cLuxMainMenu_StartGame::CreateGui()
 	vPos.x = (vPos.x / 2.0f) - (fButtonWidth / 2.0f);
 
 	// Cancel
-	pButton = mpGuiSet->CreateWidgetButton(vPos, cVector2f(fButtonWidth, 30), kTranslate("Global", "Cancel"), mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos, cVector2f(fButtonWidth, 30*fScale), kTranslate("Global", "Cancel"), mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressCancel));
 	pButton->AddCallback(eGuiMessage_UIButtonPress, this, kGuiCallback(UIPressCancel));
 	vButtons.push_back(pButton);
 
 	// Normal
-	float fButtonHeight = 30.0f;
+	float fButtonHeight = 30.0f * fScale;
 
 	vPos.x = (mvWindowSize.x) - ((fButtonWidth * 2.0f) + fButtonSepp * 4);
 
@@ -101,23 +102,23 @@ void cLuxMainMenu_StartGame::CreateGui()
 	vButtonPosition.z = 0.1f;
 
 	// Normal mode
-	mpNormalModeButton = mpGuiSet->CreateWidgetButton(vButtonPosition, cVector2f(fButtonWidth, 30), kTranslate("MainMenu","NormalMode"), mpWindow);// Translate This
+	mpNormalModeButton = mpGuiSet->CreateWidgetButton(vButtonPosition, cVector2f(fButtonWidth, 30*fScale), kTranslate("MainMenu","NormalMode"), mpWindow);// Translate This
 	mpNormalModeButton->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressNormalMode));
 	mpNormalModeButton->AddCallback(eGuiMessage_UIButtonPress, this, kGuiCallback(UIPressNormalMode));
 	mpNormalModeButton->SetDefaultFontColor(cColor(232.0f / 255.0f, 201.0f / 255.0f, 28.0f / 255.0f, 1.0f));
 	vButtons.push_back(mpNormalModeButton);
 
-	vButtonPosition.y += 35 + fButtonSepp;
+	vButtonPosition.y += 35*fScale + fButtonSepp;
 
 	// Hard mode
-	mpHardModeButton = mpGuiSet->CreateWidgetButton(vButtonPosition, cVector2f(fButtonWidth, 30), kTranslate("MainMenu", "HardMode"), mpWindow);// Translate This
+	mpHardModeButton = mpGuiSet->CreateWidgetButton(vButtonPosition, cVector2f(fButtonWidth, 30*fScale), kTranslate("MainMenu", "HardMode"), mpWindow);// Translate This
 	mpHardModeButton->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressHardMode));
 	mpHardModeButton->AddCallback(eGuiMessage_UIButtonPress, this, kGuiCallback(UIPressHardmode));
 	mpHardModeButton->SetDefaultFontColor(cColor(1.f, 1.0f));
 
 	vButtons.push_back(mpHardModeButton);
 
-	vButtonPosition.y += 50 + fButtonSepp;
+	vButtonPosition.y += 50*fScale + fButtonSepp;
 
 	////////////////////////////////////////
 	// Set up focus navigation
@@ -140,7 +141,7 @@ void cLuxMainMenu_StartGame::CreateGui()
 
 
 	vPos.x = 0;
-	vPos.y = mpWindow->GetSize().y - 90 - 10 - 30;
+	vPos.y = mpWindow->GetSize().y - 90*fScale - 10*fScale - 30*fScale;
 
 
 	////////////////////////////////////////
@@ -148,11 +149,11 @@ void cLuxMainMenu_StartGame::CreateGui()
 
 	cVector3f vDescriptionPos = cVector3f(
 		mvWindowSize.x - ((fButtonWidth * 2.0f) + fButtonSepp * 4),
-		30 + fBorderSize, 
+		30*fScale + fBorderSize, 
 		0.1f
 	);
 
-	cVector2f vDescriptionSize = cVector2f(mvWindowSize.x - (vDescriptionPos.x + fButtonSepp)  , mvWindowSize.y - (fBorderSize * 2) - 60);
+	cVector2f vDescriptionSize = cVector2f(mvWindowSize.x - (vDescriptionPos.x + fButtonSepp)  , mvWindowSize.y - (fBorderSize * 2) - 60*fScale);
 	vDescriptionSize.x -= fButtonSepp * 3.0f;
 
 	mpLDescription = mpGuiSet->CreateWidgetLabel(vDescriptionPos, vDescriptionSize, kTranslate("MainMenu", "NormalModeDescription"), mpWindow);

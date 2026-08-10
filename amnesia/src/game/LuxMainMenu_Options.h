@@ -184,6 +184,7 @@ private:
 	cWidgetCheckBox *mpChBSSAO;
 	cWidgetComboBox *mpCBSSAOSamples;
 	cWidgetComboBox *mpCBSSAOResolution;
+	cWidgetComboBox *mpCBMSAA;
 
 	cWidgetLabel	*mpLGamma;
 	cWidgetSlider	*mpSGamma;

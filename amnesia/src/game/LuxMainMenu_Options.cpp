@@ -86,6 +86,28 @@ static int GetSSAOSamplesFromIndex(int alX)
 	return 3;
 }
 
+static int GetMSAAFromIndex(int alX)
+{
+	switch(alX)
+	{
+	case 1: return 2;
+	case 2: return 4;
+	case 3: return 8;
+	}
+	return 0;
+}
+
+static int GetIndexFromMSAA(int alX)
+{
+	switch(alX)
+	{
+	case 2: return 1;
+	case 4: return 2;
+	case 8: return 3;
+	}
+	return 0;
+}
+
 //-----------------------------------------------------------------------
 
 static int GetSimulationRateFromIndex(int alX)
@@ -135,7 +157,7 @@ cResourceVarsObject cLuxMainMenu_Options::mCurrentValues = cResourceVarsObject()
 
 cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(620,460);
+	mvWindowSize = cVector2f(620,460) * LuxCalcGuiWindowScale();
 
 	mbTipFadeRestart = false;
 	mbTipWidgetUpdated = true;
@@ -209,10 +231,11 @@ void cLuxMainMenu_Options::ExitPressed()
 
 void cLuxMainMenu_Options::CreateMainGui()
 {
-	float fLeftBorderSize = 30;
-	float fUpperBorderSize = 10;
+	float fScale = LuxCalcGuiWindowScale();
+	float fLeftBorderSize = 30 * fScale;
+	float fUpperBorderSize = 10 * fScale;
 
-	cVector3f vPos(fLeftBorderSize, 35+fUpperBorderSize,1);
+	cVector3f vPos(fLeftBorderSize, 35*fScale+fUpperBorderSize,1);
 
 	//////////////////////////
 	//Window
@@ -222,16 +245,16 @@ void cLuxMainMenu_Options::CreateMainGui()
 
 	//////////////////////////
 	//Buttons
-	float fButtonWidth = 80;
-	float fButtonSepp = 3;
-	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5;
-	vPos.y = mpWindow->GetSize().y - 25 - 10;
+	float fButtonWidth = 80 * fScale;
+	float fButtonSepp = 3 * fScale;
+	vPos.x = mpWindow->GetSize().x - fButtonWidth*2-fButtonSepp-5*fScale;
+	vPos.y = mpWindow->GetSize().y - 25*fScale - 10*fScale;
 	
-	mpBOK = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("MainMenu","OK"),mpWindow);
+	mpBOK = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("MainMenu","OK"),mpWindow);
 	mpBOK->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressOK));
 
 	vPos.x += fButtonWidth + fButtonSepp;
-	mpBCancel = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30),kTranslate("MainMenu","Cancel"),mpWindow);
+	mpBCancel = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonWidth,30*fScale),kTranslate("MainMenu","Cancel"),mpWindow);
 	mpBCancel->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressCancel));
 	mpBCancel->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(UIPressCancel));
 	mpBCancel->SetGlobalUIInputListener(true);
@@ -242,11 +265,11 @@ void cLuxMainMenu_Options::CreateMainGui()
 
     
 
-	vPos = cVector3f(fLeftBorderSize, 35+fUpperBorderSize,1);
+	vPos = cVector3f(fLeftBorderSize, 35*fScale+fUpperBorderSize,1);
 
 	//////////////////////////
 	//Tabs
-	cVector2f vTabFrameSize(mvWindowSize.x-fLeftBorderSize*2, mvWindowSize.y-fUpperBorderSize*3-30-25-20);
+	cVector2f vTabFrameSize(mvWindowSize.x-fLeftBorderSize*2, mvWindowSize.y-fUpperBorderSize*3-30*fScale-25*fScale-20*fScale);
 	cWidgetTabFrame *pTabFrame = mpGuiSet->CreateWidgetTabFrame(vPos,vTabFrameSize,_W(""),mpWindow, false, true);
 	pTabFrame->SetGlobalUIInputListener(true);
 
@@ -271,7 +294,7 @@ void cLuxMainMenu_Options::CreateMainGui()
 	///////////////////
 	// Add help icons for tabs
 	cVector2f vImageSize = fUpperBorderSize * 2; vImageSize.x *= 1.5f;
-	vPos.y -= 1;
+	vPos.y -= 1*fScale;
 	vPos.x -= fUpperBorderSize * 1.3f;
 
 	mpShoulderHint[0] = mpGuiSet->CreateWidgetImage("gamepad_lb.tga", vPos, vImageSize, eGuiMaterial_Alpha, false, mpWindow, "LB Tip");
@@ -303,8 +326,8 @@ void cLuxMainMenu_Options::CreateMainGui()
 	//////////////////////////
 	//Tip Label
 	vPos.x = fLeftBorderSize;
-	vPos.y = mpWindow->GetSize().y - 25 - 10;
-	mpLTip = mpGuiSet->CreateWidgetLabel(vPos + cVector3f(10,0,0), cVector2f(400,30), _W(""), mpWindow);
+	vPos.y = mpWindow->GetSize().y - 25*fScale - 10*fScale;
+	mpLTip = mpGuiSet->CreateWidgetLabel(vPos + cVector3f(10*fScale,0,0), cVector2f(400*fScale,30*fScale), _W(""), mpWindow);
 	mpLTip->SetDefaultFontColor(cColor(1,1));
 	mpLTip->SetWordWrap(true);
 	mpLTip->SetClipActive(true);
@@ -319,17 +342,18 @@ void cLuxMainMenu_Options::CreateMainGui()
 
 void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 {
-	float fBorderSize = 15;
-	cVector3f vPos(fBorderSize, 6 + fBorderSize + 10,0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos(fBorderSize, 6*fScale + fBorderSize + 10*fScale,0.1f);
 
 	///////////////////////////////////////////////
 	// Language Combobox
 	cWidgetLabel* pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu","Language"), apTab);
-	mpCBLanguage = mpGuiSet->CreateWidgetComboBox(vPos + cVector3f(pLabel->GetSize().x + 5,-2,0), cVector2f(150,25), _W(""), apTab);
+	mpCBLanguage = mpGuiSet->CreateWidgetComboBox(vPos + cVector3f(pLabel->GetSize().x + 5*fScale,-2*fScale,0), cVector2f(150*fScale,25*fScale), _W(""), apTab);
 	SetUpInput(pLabel, mpCBLanguage, false, kTranslate("OptionsMenu", "LanguageTip"));
 	mpCBLanguage->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(ChangeLanguage));
 	
-	vPos.y += mpCBLanguage->GetSize().y + 15;
+	vPos.y += mpCBLanguage->GetSize().y + 15*fScale;
 	
 	///////////////////////////////////////////////
 	// Subtitles Checkbox
@@ -338,24 +362,24 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 
 	///////////////////////////////////////////////
 	// Effect subtitles Checkbox
-	mpChBShowEffectSubtitles = mpGuiSet->CreateWidgetCheckBox(vPos + cVector3f(mpChBShowSubtitles->GetSize().x+15,0,0), 0, kTranslate("OptionsMenu", "ShowEffectSubtitles"), apTab);
+	mpChBShowEffectSubtitles = mpGuiSet->CreateWidgetCheckBox(vPos + cVector3f(mpChBShowSubtitles->GetSize().x+15*fScale,0,0), 0, kTranslate("OptionsMenu", "ShowEffectSubtitles"), apTab);
 	SetUpInput(NULL, mpChBShowEffectSubtitles, false, kTranslate("OptionsMenu", "ShowEffectSubtitlesTip"));
 
-	vPos.y += mpChBShowSubtitles->GetSize().y + 15;
+	vPos.y += mpChBShowSubtitles->GetSize().y + 15*fScale;
 
 	///////////////////////////////////////////////
 	// Hints Checkbox
 	mpChBShowHints = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu","ShowHints"), apTab);
 	SetUpInput(NULL, mpChBShowHints, false, kTranslate("OptionsMenu", "ShowHintsTip"));
 	
-	vPos.y += mpChBShowHints->GetSize().y + 15;
+	vPos.y += mpChBShowHints->GetSize().y + 15*fScale;
 
 	///////////////////////////////////////////////
 	// Death Hints subtitles Checkbox
 	mpChBShowDeathHints = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu","ShowDeathHints"), apTab);
 	SetUpInput(NULL, mpChBShowDeathHints, false, kTranslate("OptionsMenu", "ShowDeathHintsTip"));
 	
-	vPos.y += mpChBShowDeathHints->GetSize().y + 15;
+	vPos.y += mpChBShowDeathHints->GetSize().y + 15*fScale;
 
 	///////////////////////////////////////////////
 	// Crosshair Checkbox
@@ -364,19 +388,19 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 
 	///////////////////////////////////////////////
 	// Pause on focus loss Checkbox
-	mpChBPauseOnFocusLoss = mpGuiSet->CreateWidgetCheckBox(vPos + cVector3f(mpChBShowCrosshair->GetSize().x + 15,0,0), 0, GetOptionsMenuString("PauseOnFocusLoss", _W("Pause game on focus loss")), apTab);
+	mpChBPauseOnFocusLoss = mpGuiSet->CreateWidgetCheckBox(vPos + cVector3f(mpChBShowCrosshair->GetSize().x + 15*fScale,0,0), 0, GetOptionsMenuString("PauseOnFocusLoss", _W("Pause game on focus loss")), apTab);
 	SetUpInput(NULL, mpChBPauseOnFocusLoss, false, GetOptionsMenuString("PauseOnFocusLossTip", _W("Pause the game when the window is not in focus. Uncheck to keep the game running while unfocused.")));
 
-	vPos.y += mpChBShowCrosshair->GetSize().y + 15;
+	vPos.y += mpChBShowCrosshair->GetSize().y + 15*fScale;
 
 	///////////////////////////////////////////////
 	// Focus Icon style Combobox
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu","FocusIconStyle"), apTab);
-	mpCBFocusIconStyle = mpGuiSet->CreateWidgetComboBox(vPos + cVector3f(pLabel->GetSize().x + 5,-2,0), cVector2f(150, 25), _W(""), apTab);
+	mpCBFocusIconStyle = mpGuiSet->CreateWidgetComboBox(vPos + cVector3f(pLabel->GetSize().x + 5*fScale,-2*fScale,0), cVector2f(150*fScale, 25*fScale), _W(""), apTab);
 	SetUpInput(pLabel, mpCBFocusIconStyle, false, kTranslate("OptionsMenu", "FocusIconStyleTip"));
 	mpCBFocusIconStyle->AddItem(kTranslate("OptionsMenu", "FocusIconStyleDefault"));
 	mpCBFocusIconStyle->AddItem(kTranslate("OptionsMenu", "FocusIconStyleSimple"));
-	vPos.y += pLabel->GetSize().y + 15;
+	vPos.y += pLabel->GetSize().y + 15*fScale;
 
 	//////////////////////////////////
 	// Commentary
@@ -384,7 +408,7 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	{
 		mpChBShowCommentary = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu", "Commentary"), apTab);
 		SetUpInput(NULL, mpChBShowCommentary, false, kTranslate("OptionsMenu", "CommentaryTip"));
-		vPos.y += mpChBShowCommentary->GetSize().y + 15;
+		vPos.y += mpChBShowCommentary->GetSize().y + 15*fScale;
 	}
 	
 	// Populate languages
@@ -444,8 +468,9 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 
 void cLuxMainMenu_Options::AddGraphicsOptions(cWidgetTab* apTab)
 {
-	float fBorderSize = 15;
-	cVector3f vPos(fBorderSize-5, 6 + fBorderSize, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos(fBorderSize-5*fScale, 6*fScale + fBorderSize, 0.1f);
 
 	/////////////////////////////////
 	// Basic options
@@ -468,7 +493,7 @@ void cLuxMainMenu_Options::AddGraphicsOptions(cWidgetTab* apTab)
 
 	float fButtonWidth=0;
 	mpBToggleShowGfxOptions = mpGuiSet->CreateWidgetButton(0, 
-														   cVector2f(0,25), 
+														   cVector2f(0,25*fScale), 
 														   vToggleButtonStrings[0],
 														   apTab);
 	mpBToggleShowGfxOptions->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressToggleShowGfxOptions));
@@ -483,14 +508,15 @@ void cLuxMainMenu_Options::AddGraphicsOptions(cWidgetTab* apTab)
 
 	
 	mpBToggleShowGfxOptions->SetSize(cVector2f(fButtonWidth, mpBToggleShowGfxOptions->GetSize().y));
-	mpBToggleShowGfxOptions->SetPosition(cVector3f(apTab->GetSize())-cVector3f(fButtonWidth, 50, -2));
+	mpBToggleShowGfxOptions->SetPosition(cVector3f(apTab->GetSize())-cVector3f(fButtonWidth, 50*fScale, -2));
 	
 	SetUpInput(NULL, mpBToggleShowGfxOptions, true, _W(""));
 
 	mpBToggleShowGfxOptions->SetFocusNavigation(eUIArrow_Down, mpBOK);
-	mpBToggleShowGfxOptions->SetFocusNavigation(eUIArrow_Up, mpSGamma);
+	mpBToggleShowGfxOptions->SetFocusNavigation(eUIArrow_Up, mpCBMSAA);
 
-	mpSGamma->SetFocusNavigation(eUIArrow_Down, mpBToggleShowGfxOptions);
+	mpSGamma->SetFocusNavigation(eUIArrow_Down, mpCBMSAA);
+	mpCBMSAA->SetFocusNavigation(eUIArrow_Down, mpBToggleShowGfxOptions);
 	mpChBRefraction->SetFocusNavigation(eUIArrow_Down, mpBToggleShowGfxOptions);
 
 	apTab->SetUserData(mpBToggleShowGfxOptions);
@@ -501,8 +527,9 @@ void cLuxMainMenu_Options::AddGraphicsOptions(cWidgetTab* apTab)
 
 void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 {
+	float fScale = LuxCalcGuiWindowScale();
 	float fBorderSize = 0;
-	cVector3f vPos(fBorderSize, 6 + fBorderSize, 0.1f);
+	cVector3f vPos(fBorderSize, 6*fScale + fBorderSize, 0.1f);
 
 	cWidgetLabel* pLabel = NULL;
 
@@ -511,21 +538,21 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos,0, kTranslate("OptionsMenu", "Screen"), apDummy);
 	{
 		float fBorderSize = 15;
-		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,115));
+		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,135*fScale));
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		/////////////////////////////////
 		// Resolution
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","Resolution"), pGroup);
-		mpCBResolution = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(175, 25), _W(""), pGroup);
+		mpCBResolution = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(175*fScale, 25*fScale), _W(""), pGroup);
 		SetUpInput(pLabel, mpCBResolution, false, kTranslate("OptionsMenu","ResolutionTip"));
 
 		/////////////////////////////////
 		// Simulation Rate
 		cVector3f vSimRatePos = cVector3f(fBorderSize, fBorderSize, 0.1f);
-		vSimRatePos.y += pLabel->GetSize().y + 5 + mpCBResolution->GetSize().y + 5;
+		vSimRatePos.y += pLabel->GetSize().y + 5*fScale + mpCBResolution->GetSize().y + 5*fScale;
 		pLabel = mpGuiSet->CreateWidgetLabel(vSimRatePos, -1, GetOptionsMenuString("SimulationRate", _W("Simulation Rate")), pGroup);
-		mpCBSimulationRate = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(110, 25), _W(""), pGroup);
+		mpCBSimulationRate = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(110*fScale, 25*fScale), _W(""), pGroup);
 		SetUpInput(pLabel, mpCBSimulationRate, true, GetOptionsMenuString("SimulationRateTip", _W("How many times per second the game simulation runs. Higher values are smoother but much heavier on the CPU.")));
 		mpCBSimulationRate->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(SimulationRate_OnChange));
 
@@ -534,17 +561,17 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		mpCBSimulationRate->AddItem(_W("144 Hz"));
 		mpCBSimulationRate->AddItem(_W("240 Hz"));
 
-		vPosInGroup.x += mpCBResolution->GetSize().x + 100;
+		vPosInGroup.x += mpCBResolution->GetSize().x + 100*fScale;
 
 		/////////////////////////////////
 		// Full screen and Vsync
-		mpChBFullScreen = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,2,0), -1, kTranslate("OptionsMenu","FullScreen"), pGroup);
+		mpChBFullScreen = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,2*fScale,0), -1, kTranslate("OptionsMenu","FullScreen"), pGroup);
 		SetUpInput(NULL, mpChBFullScreen, false, kTranslate("OptionsMenu","FullScreenTip"));
 
-		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10,0), 0, kTranslate("OptionsMenu","VSync"), pGroup);
+		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10*fScale,0), 0, kTranslate("OptionsMenu","VSync"), pGroup);
 		SetUpInput(NULL, mpChBVSync, false, kTranslate("OptionsMenu","VSyncTip"));
 
-		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10+mpChBVSync->GetSize().y+10,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
+		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10*fScale+mpChBVSync->GetSize().y+10*fScale,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
 		SetUpInput(NULL, mpChBUncapFPS, false, GetOptionsMenuString("UncapFPSTip", _W("Render as fast as possible instead of locking the game to 60 FPS.")));
 
 
@@ -553,12 +580,12 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 
 	}
 
-	vPos.y += pGroup->GetSize().y + 5;
+	vPos.y += pGroup->GetSize().y + 5*fScale;
 
 	/////////////////////////////////
 	// Texture Quality
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu","TexQuality"), apDummy);
-	mpCBTextureSizeLevel = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y +5,0), cVector2f(100,25), _W(""), apDummy);
+	mpCBTextureSizeLevel = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y +5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), apDummy);
 	SetUpInput(pLabel, mpCBTextureSizeLevel, true, kTranslate("OptionsMenu","TexQualityTip"));
 
 	cMaterialManager* pMatMgr = gpBase->mpEngine->GetResources()->GetMaterialManager();
@@ -573,17 +600,17 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 
 	/////////////////////////////////
 	// Gamma
-	vPos.x += 140;
+	vPos.x += 140*fScale;
 
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu","Gamma"), apDummy);
 	{
-		cVector3f vLabelPos(0, pLabel->GetSize().y+5, 0);
+		cVector3f vLabelPos(0, pLabel->GetSize().y+5*fScale, 0);
 
 		cWidgetImage *pImg = mpGuiSet->CreateWidgetImage("menu_gamma.tga", vLabelPos, -1, eGuiMaterial_Alpha, false, pLabel);
 		SetUpInput(NULL, pImg, false, kTranslate("OptionsMenu","GammaInstructions"));
-		vLabelPos.y += pImg->GetSize().y + 5.0f;
+		vLabelPos.y += pImg->GetSize().y + 5.0f*fScale;
 
-		mpSGamma = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal,vLabelPos, cVector2f(pImg->GetSize().x, 20), 0, pLabel);
+		mpSGamma = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal,vLabelPos, cVector2f(pImg->GetSize().x, 20*fScale), 0, pLabel);
 		//mpSGamma->AddCallback(eGuiMessage_SliderMove, this, kGuiCallback(GammaSlider_OnMove));
 		SetUpInput(pLabel, mpSGamma, false, kTranslate("OptionsMenu","GammaInstructions"));
 		SetUpSlider(mpSGamma, mfGammaMin, mfGammaMax, mfGammaStep, kGuiCallback(GammaSlider_OnMove), &mpLGamma);
@@ -600,6 +627,18 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		//pLInstr->SetWordWrap(true);
 		//pLInstr->SetDefaultFontSize(12);
 	}
+
+	//////////////////////////////
+	// MSAA
+	vPos.x = 0;
+	vPos.y = mpCBTextureSizeLevel->GetLocalPosition().y + mpCBTextureSizeLevel->GetSize().y + 15*fScale;
+	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, GetOptionsMenuString("MSAA", _W("Anti-Aliasing")), apDummy);
+	mpCBMSAA = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), apDummy);
+	SetUpInput(pLabel, mpCBMSAA, true, GetOptionsMenuString("MSAATip", _W("Multisample anti-aliasing, smooths the edges of text and UI. Requires a restart.")));
+	mpCBMSAA->AddItem(kTranslate("OptionsMenu","Off"));
+	mpCBMSAA->AddItem(_W("2X"));
+	mpCBMSAA->AddItem(_W("4X"));
+	mpCBMSAA->AddItem(_W("8X"));
 
 	mpCBResolution->SetFocusNavigation(eUIArrow_Down, mpCBSimulationRate);
 	mpCBResolution->SetFocusNavigation(eUIArrow_Right, mpChBFullScreen);
@@ -628,6 +667,9 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Down, mpSGamma);
 
 	mpSGamma->SetFocusNavigation(eUIArrow_Up, mpCBTextureSizeLevel);
+
+	mpCBMSAA->SetFocusNavigation(eUIArrow_Up, mpSGamma);
+	mpSGamma->SetFocusNavigation(eUIArrow_Down, mpCBMSAA);
 	
 }
 
@@ -635,28 +677,29 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 
 void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 {
+	float fScale = LuxCalcGuiWindowScale();
 	float fBorderSize = 0;
-	cVector3f vPos(fBorderSize, 6 + fBorderSize, 0.1f);
-	float fItemSep = 180;
+	cVector3f vPos(fBorderSize, 6*fScale + fBorderSize, 0.1f);
+	float fItemSep = 180 * fScale;
 
-	cWidgetFrame* pMainFrame = mpGuiSet->CreateWidgetFrame(cVector3f(0,0,1), cVector2f(550,275), false, apDummy, false, true);
+	cWidgetFrame* pMainFrame = mpGuiSet->CreateWidgetFrame(cVector3f(0,0,1), cVector2f(550*fScale,275*fScale), false, apDummy, false, true);
 	pMainFrame->SetDrawBackground(false);
 
 	cWidgetLabel* pLabel = NULL;
 
-	cVector2f vGroupSize = cVector2f(520, 70);
+	cVector2f vGroupSize = cVector2f(520*fScale, 70*fScale);
 
 	////////////////////////////
 	// Texture
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu","Material"), pMainFrame);
 	{
-		float fBorderSize = 15;
+		float fBorderSize = 15 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		////////////////////////////
 		// Texture filter
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","TexFilter"), pGroup);
-		mpCBTextureFilter = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(150,25), _W(""), pLabel);
+		mpCBTextureFilter = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(150*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBTextureFilter, false, kTranslate("OptionsMenu","TexFilterTip"));
 
 		//vPosInGroup.x += mpCBTextureFilter->GetSize().x + 20;
@@ -666,7 +709,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		/////////////////////////////
 		// Anisotropy
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","Anisotropy"), pGroup);
-		mpCBAnisotropy = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,25), _W(""), pLabel);
+		mpCBAnisotropy = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBAnisotropy, false, kTranslate("OptionsMenu","AnisotropyTip"));
 
 		//vPosInGroup.x += mpCBAnisotropy->GetSize().x + 20;
@@ -676,17 +719,17 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		/////////////////////////////
 		// Parallax Quality
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("Launcher","Parallax"), pGroup);
-		mpCBParallaxQuality = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,25), _W(""), pLabel);
+		mpCBParallaxQuality = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBParallaxQuality, true, kTranslate("OptionsMenu","ParallaxQualityTip"));
 	}
 
-	vPos.y += pGroup->GetSize().y + 10;
+	vPos.y += pGroup->GetSize().y + 10*fScale;
 
     /////////////////////////////
 	// Shadows Group
 	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu", "Shadows"), pMainFrame);
 	{
-		float fBorderSize = 15;
+		float fBorderSize = 15 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		/////////////////////////////
@@ -700,7 +743,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		/////////////////////////////
 		// Shadow Quality
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu", "ShadowQuality"), pGroup);
-		mpCBShadowQuality = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,25), _W(""), pLabel);
+		mpCBShadowQuality = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBShadowQuality, true, kTranslate("OptionsMenu","ShadowQualityTip"));
 
 		//vPosInGroup.x += mpCBShadowQuality->GetSize().x + 15;
@@ -709,7 +752,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		/////////////////////////////
 		// Shadow Resolution
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu", "ShadowRes"), pGroup);	
-		mpCBShadowRes = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,25), _W(""), pLabel);
+		mpCBShadowRes = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBShadowRes, true, kTranslate("OptionsMenu","ShadowResTip"));
 
 
@@ -732,14 +775,14 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		mpCBParallaxQuality->AddItem(kTranslate("Launcher","On"));//Skipping medium since high and medium is really the same!
 	}
 
-	vPos.y += pGroup->GetSize().y + 10;
+	vPos.y += pGroup->GetSize().y + 10*fScale;
 
 	////////////////////////////
 	// Post Effects
 	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu","PostEffects"), pMainFrame);
 	{
-		float fBorderSize = 15;
-		float fInputSep = 10;
+		float fBorderSize = 15 * fScale;
+		float fInputSep = 10 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 		float fMaxWidth = 0;
 
@@ -790,12 +833,12 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		SetUpInput(NULL, mpChBInsanity, false, kTranslate("OptionsMenu","InsanityTip"));
 	}
 
-	vPos.y += pGroup->GetSize().y + 10;
+	vPos.y += pGroup->GetSize().y + 10*fScale;
 	////////////////////////////
 	// SSAO Group
 	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu", "SSAO"), pMainFrame);
 	{
-		float fBorderSize = 15;
+		float fBorderSize = 15 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		///////////////////////////
@@ -809,7 +852,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		///////////////////////////
 		// SSAO Samples
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","SSAOSamples"), pGroup);
-		mpCBSSAOSamples = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(60,25), _W(""), pLabel);
+		mpCBSSAOSamples = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(60*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBSSAOSamples, true, kTranslate("OptionsMenu","SSAOSamplesTip"));
 
 		for(int i=0;i<4;++i)
@@ -824,14 +867,14 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		///////////////////////////
 		// SSAO Resolution
 		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup, -1, kTranslate("OptionsMenu","SSAOResolution"), pGroup);
-		mpCBSSAOResolution = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(80,25), _W(""), pLabel);
+		mpCBSSAOResolution = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(80*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBSSAOResolution, true, kTranslate("OptionsMenu","SSAOResolutionTip"));
 
 		mpCBSSAOResolution->AddItem(kTranslate("OptionsMenu", "Medium"));
 		mpCBSSAOResolution->AddItem(kTranslate("OptionsMenu", "High"));
 	}
 
-	vPos.y += pGroup->GetSize().y + 10;
+	vPos.y += pGroup->GetSize().y + 10*fScale;
 
 	////////////////////////////
 	// Water Group
@@ -848,14 +891,14 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 	// Misc
 	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("KeyConfig","Misc"), pMainFrame);
 	{
-		float fBorderSize = 15;
+		float fBorderSize = 15 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		// Enabled
 		mpChEdgeSmooth = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, kTranslate("OptionsMenu","FullscreenSmooth"), pGroup);
 		SetUpInput(NULL, mpChEdgeSmooth, true, kTranslate("OptionsMenu","EdgeSmoothTip"));
 
-		vPosInGroup.y += mpChEdgeSmooth->GetSize().y + 10;
+		vPosInGroup.y += mpChEdgeSmooth->GetSize().y + 10*fScale;
 
 		mpChBRefraction = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, kTranslate("OptionsMenu", "Refraction"), pGroup);
 		SetUpInput(NULL, mpChBRefraction, true, kTranslate("OptionsMenu", "RefractionTip"));
@@ -971,27 +1014,28 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 {
-	float fBorderSize = 15;
-	cVector3f vPos(fBorderSize, 6 + fBorderSize + 10, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos(fBorderSize, 6*fScale + fBorderSize + 10*fScale, 0.1f);
 
 	/////////////////////////////
 	// Invert Mouse
     mpChBInvertMouse = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu", "InvertMouse"), apTab);
 	SetUpInput(NULL, mpChBInvertMouse, false, kTranslate("OptionsMenu","InvertMouseTip"));
 
-	vPos.y += mpChBInvertMouse->GetSize().y + 15;
+	vPos.y += mpChBInvertMouse->GetSize().y + 15*fScale;
 
 	/////////////////////////////
 	// Smooth Mouse
 	mpChBSmoothMouse = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu", "SmoothMouse"), apTab);
 	SetUpInput(NULL, mpChBSmoothMouse, false, kTranslate("OptionsMenu","SmoothMouseTip"));
 
-	vPos.y += mpChBSmoothMouse->GetSize().y + 15;
+	vPos.y += mpChBSmoothMouse->GetSize().y + 15*fScale;
 
 	/////////////////////////////
 	// Mouse Sensitivity
 	cWidgetLabel* pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu", "MouseSensitivity"), apTab);
-	mpSMouseSensitivity = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,20), 0, pLabel);
+	mpSMouseSensitivity = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,20*fScale), 0, pLabel);
 	//mpSMouseSensitivity->AddCallback(eGuiMessage_SliderMove, this, kGuiCallback(MouseSensitivitySlider_OnMove));
 	SetUpInput(pLabel, mpSMouseSensitivity, false, kTranslate("OptionsMenu", "MouseSensitivityTip"));
 	SetUpSlider(mpSMouseSensitivity, mfMouseSensitivityMin, mfMouseSensitivityMax, mfMouseSensitivityStep, kGuiCallback(MouseSensitivitySlider_OnMove), &mpLMouseSensitivity);
@@ -999,7 +1043,7 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 	//mpLMouseSensitivity = mpGuiSet->CreateWidgetLabel(cVector3f(mpSMouseSensitivity->GetSize().x*0.5f,2,1), -1, _W(""), mpSMouseSensitivity);
 	//mpLMouseSensitivity->SetTextAlign(eFontAlign_Center);
 
-	vPos.y += mpSMouseSensitivity->GetLocalPosition().y + mpSMouseSensitivity->GetSize().y + 15;
+	vPos.y += mpSMouseSensitivity->GetLocalPosition().y + mpSMouseSensitivity->GetSize().y + 15*fScale;
 
 #ifdef USE_GAMEPAD
 	//////////////////////////////////////////////////
@@ -1013,17 +1057,17 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 	mpChBGamepadInvertLook = mpGuiSet->CreateWidgetCheckBox(vPos, 0, kTranslate("OptionsMenu", "InvertGamepadLook"), apTab);
 	SetUpInput(NULL, mpChBGamepadInvertLook, false, kTranslate("OptionsMenu","InvertGamepadLookTip"));
 
-	vPos.y += mpChBGamepadInvertLook->GetSize().y + 15;
+	vPos.y += mpChBGamepadInvertLook->GetSize().y + 15*fScale;
 
 	/////////////////////////////
 	// Gamepad Sensitivity
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu", "GamepadLookSensitivity"), apTab);
-	mpSGamepadLookSensitivity = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,20), 0, pLabel);
+	mpSGamepadLookSensitivity = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,20*fScale), 0, pLabel);
 	//mpSGamepadLookSensitivity->AddCallback(eGuiMessage_SliderMove, this, kGuiCallback(MouseSensitivitySlider_OnMove));
 	SetUpInput(pLabel, mpSMouseSensitivity, false, kTranslate("OptionsMenu", "GamepadLookSensitivityTip"));
 	SetUpSlider(mpSGamepadLookSensitivity, mfGamepadLookSensitivityMin, mfGamepadLookSensitivityMax, mfGamepadLookSensitivityStep, kGuiCallback(GamepadLookSensitivitySlider_OnMove), &mpLGamepadLookSensitivity);
 
-	vPos.y += mpSGamepadLookSensitivity->GetLocalPosition().y + mpSGamepadLookSensitivity->GetSize().y + 15;
+	vPos.y += mpSGamepadLookSensitivity->GetLocalPosition().y + mpSGamepadLookSensitivity->GetSize().y + 15*fScale;
 
 	//mpLMouseSensitivity = mpGuiSet->CreateWidgetLabel(cVector3f(mpSMouseSensitivity->GetSize().x*0.5f,2,1), -1, _W(""), mpSMouseSensitivity);
 	//mpLMouseSensitivity->SetTextAlign(eFontAlign_Center);
@@ -1031,9 +1075,9 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 
 	//////////////////////////////
 	// Key Config Button
-	mpBKeyConfig = mpGuiSet->CreateWidgetButton(vPos, cVector2f(0,25), kTranslate("OptionsMenu","KeyConfigButton"), apTab);
+	mpBKeyConfig = mpGuiSet->CreateWidgetButton(vPos, cVector2f(0,25*fScale), kTranslate("OptionsMenu","KeyConfigButton"), apTab);
 	float fButtonWidth = mpBKeyConfig->GetDefaultFontType()->GetLength(mpBKeyConfig->GetDefaultFontSize(), mpBKeyConfig->GetText().c_str());
-	mpBKeyConfig->SetSize(cVector2f(fButtonWidth+20, mpBKeyConfig->GetSize().y));
+	mpBKeyConfig->SetSize(cVector2f(fButtonWidth+20*fScale, mpBKeyConfig->GetSize().y));
 	SetUpInput(NULL, mpBKeyConfig, false, kTranslate("OptionsMenu", "KeyConfigButtonTip"));
 	mpBKeyConfig->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(PressKeyConfig));
 
@@ -1072,23 +1116,24 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 
 void cLuxMainMenu_Options::AddSoundOptions(cWidgetTab* apTab)
 {
-	float fBorderSize = 15;
-	cVector3f vPos(fBorderSize, 6 + fBorderSize + 10, 0.1f);
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 15 * fScale;
+	cVector3f vPos(fBorderSize, 6*fScale + fBorderSize + 10*fScale, 0.1f);
 
 	/////////////////////////////
 	// Sound Device selector
 	cWidgetLabel* pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu", "SoundDevice"), apTab);
-	vPos.y += pLabel->GetSize().y + 5;
+	vPos.y += pLabel->GetSize().y + 5*fScale;
 
-	mpCBSndDevice = mpGuiSet->CreateWidgetComboBox(vPos, cVector2f(400, 25), _W(""), apTab);
+	mpCBSndDevice = mpGuiSet->CreateWidgetComboBox(vPos, cVector2f(400*fScale, 25*fScale), _W(""), apTab);
 	SetUpInput(pLabel, mpCBSndDevice, true, kTranslate("OptionsMenu", "SoundDeviceTip"));
 
-	vPos.y += mpCBSndDevice->GetSize().y + 15;
+	vPos.y += mpCBSndDevice->GetSize().y + 15*fScale;
 
 	/////////////////////////////
 	// Sound Master Volume
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu", "Volume"), apTab);
-	mpSVolume = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, vPos + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(100,20), 0, apTab);
+	mpSVolume = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, vPos + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,20*fScale), 0, apTab);
 	//mpSVolume->AddCallback(eGuiMessage_SliderMove, this, kGuiCallback(SoundSlider_OnMove));
 	SetUpInput(pLabel, mpSVolume, false, kTranslate("OptionsMenu", "VolumeTip"));
 	SetUpSlider(mpSVolume, mfVolumeMin, mfVolumeMax, mfVolumeStep, kGuiCallback(SoundSlider_OnMove), &mpLVolume);
@@ -1366,6 +1411,9 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		float fGamma = aObj.GetVarFloat("Gamma");
 		SetSliderValue(mpSGamma, fGamma, false, mfGammaMin, mfGammaMax);
 		SetGammaLabelString(fGamma);
+
+		// MSAA
+		mpCBMSAA->SetSelectedItem(GetIndexFromMSAA(aObj.GetVarInt("MSAA", 0)), true, false);
 	}
 #endif
 	////////////////////////////////
@@ -1522,6 +1570,7 @@ void cLuxMainMenu_Options::ApplyChanges()
 //		pCfgHdr->mbAdaptiveVSync = mpChBAdaptiveVSync->IsChecked();
 		pCfgHdr->mbUncapFPS = mpChBUncapFPS->IsChecked();
 		pCfgHdr->mlSimulationRate = GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem());
+		pCfgHdr->mlMultisampling = GetMSAAFromIndex(mpCBMSAA->GetSelectedItem());
 		pGfx->GetLowLevel()->SetVsyncActive(pCfgHdr->mbVSync, pCfgHdr->mbAdaptiveVSync);
 		gpBase->mpEngine->SetLimitFPS(pCfgHdr->mbUncapFPS == false);
 		gpBase->mpEngine->SetUpdatesPerSec(pCfgHdr->mlSimulationRate);
@@ -1886,6 +1935,10 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarInt("SSAONumOfSamples", gpBase->mpConfigHandler->mlSSAOSamples);
 		aObj.AddVarInt("SSAOResolution", gpBase->mpConfigHandler->mlSSAOResolution);
 
+		/////////////////////////
+		// MSAA
+		aObj.AddVarInt("MSAA", gpBase->mpConfigHandler->mlMultisampling);
+
 		/////////////////
 		// PostEffects
 		cLuxMapHandler* pMapHdlr = gpBase->mpMapHandler;
@@ -1983,6 +2036,10 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("SSAOActive", mpChBSSAO->IsChecked());
 		aObj.AddVarInt("SSAONumOfSamples", GetSSAOSamplesFromIndex(mpCBSSAOSamples->GetSelectedItem()));
 		aObj.AddVarInt("SSAOResolution", mpCBSSAOResolution->GetSelectedItem());
+
+		/////////////////////////
+		// MSAA
+		aObj.AddVarInt("MSAA", GetMSAAFromIndex(mpCBMSAA->GetSelectedItem()));
 
 		/////////////////
 		// PostEffects

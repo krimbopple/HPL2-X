@@ -37,12 +37,14 @@ cLuxMainMenu_Profile::cLuxMainMenu_Profile(cGuiSet *apGuiSet, cGuiSkin *apGuiSki
 	mlLastPickedProfile = -1;
 	msDefaultProfileName = kTranslate("MainMenu","New Player");
 
-	mvWindowSize = gpBase->mpMenuCfg->GetVector2f("Profiles","WindowSize",0);
-	mfInformationWidth = gpBase->mpMenuCfg->GetFloat("Profiles","InformationWidth",0);
-	mvListFontSize = gpBase->mpMenuCfg->GetVector2f("Profiles","ListFontSize",0);
+	float fScale = LuxCalcGuiWindowScale();
 
-	mvEnterNameWindowSize = gpBase->mpMenuCfg->GetVector2f("Profiles","EnterNameWindowSize",0);
-	mfEnterNameButtonLength = gpBase->mpMenuCfg->GetFloat("Profiles","EnterNameButtonLength",0);
+	mvWindowSize = gpBase->mpMenuCfg->GetVector2f("Profiles","WindowSize",0) * fScale;
+	mfInformationWidth = gpBase->mpMenuCfg->GetFloat("Profiles","InformationWidth",0) * fScale;
+	mvListFontSize = gpBase->mpMenuCfg->GetVector2f("Profiles","ListFontSize",0) * fScale;
+
+	mvEnterNameWindowSize = gpBase->mpMenuCfg->GetVector2f("Profiles","EnterNameWindowSize",0) * fScale;
+	mfEnterNameButtonLength = gpBase->mpMenuCfg->GetFloat("Profiles","EnterNameButtonLength",0) * fScale;
 }
 
 //-----------------------------------------------------------------------
@@ -108,8 +110,9 @@ void cLuxMainMenu_Profile::CreateMainGui()
 {
 	cWidgetButton *pButton;
 
-	float fWindowHeaderSize = 40;
-	float fBorderSize = 35;
+	float fScale = LuxCalcGuiWindowScale();
+	float fWindowHeaderSize = 40 * fScale;
+	float fBorderSize = 35 * fScale;
 
 	cVector3f vPos(fBorderSize, fWindowHeaderSize+fBorderSize,1);
 
@@ -126,7 +129,7 @@ void cLuxMainMenu_Profile::CreateMainGui()
 	//////////////////////////
 	//List box
 	mpListProfiles = mpGuiSet->CreateWidgetListBox(vPos,cVector2f(mvWindowSize.x - mfInformationWidth - fBorderSize*2,
-																mvWindowSize.y-vPos.y-40-fBorderSize*2),
+																mvWindowSize.y-vPos.y-40*fScale-fBorderSize*2),
 													mpWindow);
 	mpListProfiles->AddCallback(eGuiMessage_SelectionChange,this, kGuiCallback(SelectedProfileChange));
 	mpListProfiles->AddCallback(eGuiMessage_SelectionDoubleClick,this, kGuiCallback(DoubleClickSelection));
@@ -149,10 +152,10 @@ void cLuxMainMenu_Profile::CreateMainGui()
 	//////////////////////////
 	//Buttons
 	std::vector<iWidget*> vButtons;
-	float fButtonSepp = 3.0f;
+	float fButtonSepp = 3.0f * fScale;
 	float fButtonLength = mpListProfiles->GetSize().x / 3.0f- fButtonSepp;
 	//Select
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30),kTranslate("MainMenu","Select"),mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30*fScale),kTranslate("MainMenu","Select"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressSelectProfile));
 	mpSelectButton = pButton;
 	vPos.x += fButtonLength + fButtonSepp;
@@ -160,7 +163,7 @@ void cLuxMainMenu_Profile::CreateMainGui()
 	vButtons.push_back(pButton);
 
 	//Create
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30),kTranslate("MainMenu","Create"),mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30*fScale),kTranslate("MainMenu","Create"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressCreateProfile));
 
 	vPos.x += fButtonLength + fButtonSepp;
@@ -168,7 +171,7 @@ void cLuxMainMenu_Profile::CreateMainGui()
 	vButtons.push_back(pButton);
 
 	//Delete
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30),kTranslate("MainMenu","Delete"),mpWindow);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(fButtonLength,30*fScale),kTranslate("MainMenu","Delete"),mpWindow);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressDeleteProfile));
 	vPos.x += fButtonLength + fButtonSepp;
 
@@ -203,13 +206,14 @@ void cLuxMainMenu_Profile::CreateEnterNameGui()
 {
 	cWidgetButton *pButton;
 
-	float fBorderSize = 5;
+	float fScale = LuxCalcGuiWindowScale();
+	float fBorderSize = 5 * fScale;
 
-	cVector3f vPos(fBorderSize, 25+fBorderSize,1);
+	cVector3f vPos(fBorderSize, 25*fScale+fBorderSize,1);
 
 	//////////////////////////
 	//Window
-	vPos.y += 5;
+	vPos.y += 5*fScale;
 	mpWindowEnterName = mpGuiSet->CreateWidgetWindow(eWidgetWindowButtonFlag_ButtonClose,cVector3f(0,0,10),mvEnterNameWindowSize,
 													kTranslate("MainMenu","Create Profile"));
 	//mpWindowEnterName->AddCallback(eGuiMessage_WindowClose,this, kGuiCallback(WindowCloses));
@@ -222,7 +226,7 @@ void cLuxMainMenu_Profile::CreateEnterNameGui()
 	//////////////////////////
 	//Text Box
 	tWString sIllegalChars = _W("*/\\:<>|\"?");
-	mpTextEnterName = mpGuiSet->CreateWidgetTextBox(vPos,cVector2f(mvEnterNameWindowSize.x-fBorderSize*2, 20), _W(""),mpWindowEnterName);
+	mpTextEnterName = mpGuiSet->CreateWidgetTextBox(vPos,cVector2f(mvEnterNameWindowSize.x-fBorderSize*2, 20*fScale), _W(""),mpWindowEnterName);
 	mpTextEnterName->SetForceCallBackOnEnter(true);
 	mpTextEnterName->SetCallbackOnLostFocus(false);
 	mpTextEnterName->SetIllegalChars(sIllegalChars);
@@ -239,8 +243,8 @@ void cLuxMainMenu_Profile::CreateEnterNameGui()
 	std::vector<iWidget*> vButtons;
 	//Create
     //vPos.x += mpTextEnterName->GetSize().x - fButtonLength*2 - fButtonSepp; //right align buttons!
-	vPos.y =  mvEnterNameWindowSize.y - 30 - fBorderSize; 
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(mfEnterNameButtonLength, 30),kTranslate("MainMenu","Create"),mpWindowEnterName);
+	vPos.y =  mvEnterNameWindowSize.y - 30*fScale - fBorderSize; 
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(mfEnterNameButtonLength, 30*fScale),kTranslate("MainMenu","Create"),mpWindowEnterName);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressEnterNameCreate));
 	mpCreateButton = pButton;
 	mpTextEnterName->SetUserData(mpCreateButton);
@@ -248,7 +252,7 @@ void cLuxMainMenu_Profile::CreateEnterNameGui()
 
 	//Cancel
 	vPos.x += mfEnterNameButtonLength + fButtonSepp;
-	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(mfEnterNameButtonLength, 30),kTranslate("MainMenu","Cancel"),mpWindowEnterName);
+	pButton = mpGuiSet->CreateWidgetButton(vPos,cVector2f(mfEnterNameButtonLength, 30*fScale),kTranslate("MainMenu","Cancel"),mpWindowEnterName);
 	pButton->AddCallback(eGuiMessage_ButtonPressed,this, kGuiCallback(PressEnterNameCancel));
 	pButton->AddCallback(eGuiMessage_UIButtonPress,this, kGuiCallback(UIPressEnterNameCancel));
 	pButton->SetGlobalUIInputListener(true);
