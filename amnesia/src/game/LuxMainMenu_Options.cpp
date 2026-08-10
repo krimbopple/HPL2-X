@@ -501,7 +501,7 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos,0, kTranslate("OptionsMenu", "Screen"), apDummy);
 	{
 		float fBorderSize = 15;
-		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,135));
+		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,115));
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		/////////////////////////////////
@@ -513,7 +513,7 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		/////////////////////////////////
 		// Simulation Rate
 		cVector3f vSimRatePos = cVector3f(fBorderSize, fBorderSize, 0.1f);
-		vSimRatePos.y += pLabel->GetSize().y + 5 + mpCBResolution->GetSize().y + 15;
+		vSimRatePos.y += pLabel->GetSize().y + 5 + mpCBResolution->GetSize().y + 5;
 		pLabel = mpGuiSet->CreateWidgetLabel(vSimRatePos, -1, GetOptionsMenuString("SimulationRate", _W("Simulation Rate")), pGroup);
 		mpCBSimulationRate = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5,0), cVector2f(110, 25), _W(""), pGroup);
 		SetUpInput(pLabel, mpCBSimulationRate, true, GetOptionsMenuString("SimulationRateTip", _W("How many times per second the game simulation runs. Higher values are smoother but much heavier on the CPU.")));
@@ -543,7 +543,7 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 
 	}
 
-	vPos.y += pGroup->GetSize().y + 15;
+	vPos.y += pGroup->GetSize().y + 5;
 
 	/////////////////////////////////
 	// Texture Quality
