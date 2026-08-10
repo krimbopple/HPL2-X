@@ -135,6 +135,8 @@ namespace hpl {
 
 		void SetMultisamplingActive(bool abX);
 
+		void SetAlphaToCoverageActive(bool abX);
+
 		void SetGammaCorrection(float afX);
 		float GetGammaCorrection();
 

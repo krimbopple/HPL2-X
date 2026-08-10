@@ -103,6 +103,11 @@ namespace hpl {
 
 		virtual void SetMultisamplingActive(bool abX)=0;
 
+		/**
+		 * Converts the fragment alpha into sample coverage so MSAA can smooth it out
+		 */
+		virtual void SetAlphaToCoverageActive(bool abX)=0;
+
 		virtual void SetGammaCorrection(float afX)=0;
 		virtual float GetGammaCorrection()=0;
 

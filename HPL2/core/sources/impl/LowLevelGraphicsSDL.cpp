@@ -743,6 +743,18 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
+	void cLowLevelGraphicsSDL::SetAlphaToCoverageActive(bool abX)
+	{
+		if(!GLEW_ARB_multisample || mlMultisampling<=0) return;
+
+		if(abX)
+			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+		else
+			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+	}
+
+	//-----------------------------------------------------------------------
+
 	void cLowLevelGraphicsSDL::SetGammaCorrection(float afX)
 	{
 		;

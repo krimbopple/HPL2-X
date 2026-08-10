@@ -77,6 +77,7 @@ namespace hpl {
 	{
 		mpLowLevelGraphics->SetBlendActive(true);
 		mpLowLevelGraphics->SetBlendFunc(eBlendFunc_SrcAlpha, eBlendFunc_OneMinusSrcAlpha);
+		mpLowLevelGraphics->SetAlphaToCoverageActive(true);
 	}
 
 	//-----------------------------------------------------------------------
@@ -85,6 +86,7 @@ namespace hpl {
 	{
 		//Not needed right?
 		//mpLowLevelGraphics->SetBlendFunc(eBlendFunc_One, eBlendFunc_OneMinusSrcAlpha);
+		mpLowLevelGraphics->SetAlphaToCoverageActive(false);
 	}
 
 	//-----------------------------------------------------------------------
