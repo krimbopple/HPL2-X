@@ -763,7 +763,12 @@ cEngine* iEditorBase::Init(cEngine* apEngine, const char* asName, const char* as
 	mpSkin = mpEngine->GetGui()->CreateSkin("gui_default.skin");
 	mpSet = mpEngine->GetGui()->CreateSet("MainSet",mpSkin);
 
+	// HACK: this is a really shitty workaround but it works!
+	// HACK: we keep the software cursor active but fully transparent so GUI events still work
+	cGuiGfxElement* pTransparent = mpEngine->GetGui()->CreateGfxFilledRect(cColor(0, 0), eGuiMaterial_Alpha);
+	mpSet->SetCurrentPointer(pTransparent);
 	mpSet->SetDrawMouse(true);
+	mpEngine->GetGraphics()->GetLowLevel()->ShowCursor(true);
 	mpSet->SetMouseZ(1000);
 
 	//If the engine was already created, we are inside another app and to not want to set focus
@@ -1619,14 +1624,14 @@ kGuiCallbackDeclaredFuncEnd(iEditorBase, EscapeKeyHandlerCallback);
 
 void iEditorBase::AppGotMouseFocus()
 {
-	mpSet->SetDrawMouse(true);
+	// mpSet->SetDrawMouse(true);
 }
 
 //----------------------------------------------------------------------------
 
 void iEditorBase::AppLostMouseFocus()
 {
-	mpSet->SetDrawMouse(false);
+	// mpSet->SetDrawMouse(false);
 }
 
 //----------------------------------------------------------------------------

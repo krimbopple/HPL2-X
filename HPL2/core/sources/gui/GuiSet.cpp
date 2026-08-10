@@ -289,7 +289,7 @@ namespace hpl {
 		mvVirtualSizeOffset = cVector2f(0);
 
 		mbActive = true;
-		mbDrawMouse = true;
+		mbDrawMouse = false;
 		mfMouseZ =mfVirtualMaxZ;
 
 		mbIs3D = false;
@@ -2444,12 +2444,14 @@ namespace hpl {
 
 	bool cGuiSet::DrawMouse(iWidget* apWidget, const cGuiMessageData& aData)
 	{	
+		// we use hardware instead cuz software sucks!
+		/*
 		if(HasFocus() && mbDrawMouse && mpGfxCurrentPointer)
 		{
 			DrawGfx(mpGfxCurrentPointer,cVector3f(mvMousePos.x,mvMousePos.y, mfMouseZ),
 				mpGfxCurrentPointer->GetImageSize(),cColor(1,1));
 		}
-		
+		*/
 		return true;
 	}
 	kGuiCallbackDeclaredFuncEnd(cGuiSet,DrawMouse)
