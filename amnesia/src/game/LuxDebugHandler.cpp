@@ -323,10 +323,11 @@ void cLuxDebugHandler::SetDebugWindowActive(bool abActive)
 		mpGuiSet->SetActive(true);
 		gpBase->mpInputHandler->ChangeState(eLuxInputState_Debug);
 
+		mpGuiSet->SetDrawMouse(true);
 		if(gpBase->mpConfigHandler->mbFullscreen==false) {
 			gpBase->mpEngine->GetInput()->GetLowLevel()->LockInput(false);
-			gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
 		}
+		gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
 	}
 	//////////////////
 	// Disabled
@@ -337,10 +338,11 @@ void cLuxDebugHandler::SetDebugWindowActive(bool abActive)
 		mpGuiSet->SetActive(false);
 		gpBase->mpInputHandler->ChangeState(eLuxInputState_Game);
 
+		mpGuiSet->SetDrawMouse(false);
 		if(gpBase->mpConfigHandler->mbFullscreen==false) {
 			gpBase->mpEngine->GetInput()->GetLowLevel()->LockInput(true);
-			gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(true);
 		}
+		gpBase->mpEngine->GetInput()->GetLowLevel()->RelativeMouse(true);
 	}
 }
 
