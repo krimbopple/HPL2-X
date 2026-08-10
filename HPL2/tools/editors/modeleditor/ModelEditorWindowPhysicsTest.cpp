@@ -343,6 +343,7 @@ void cModelEditorWindowPhysicsTest::SetUpModel()
 	cResources* pRes = pEngine->GetResources();
 	iXmlDocument* pDoc = pRes->GetLowLevel()->CreateXmlDocument();
 	pModel->Save(pDoc);
+	pEngine->GetGraphics()->GetLowLevel()->ShowCursor(true);
 
 	cEditorEntityLoader* pLoader = mpEditor->GetEngineEntityLoader();
 	
@@ -507,7 +508,6 @@ void cModelEditorWindowPhysicsTest::OnInitLayout()
 	UpdateViewport();
 	SetViewportActive(true);
 	mCamera.LockToGrid(false);
-
 }
 
 //------------------------------------------------------------------------------------

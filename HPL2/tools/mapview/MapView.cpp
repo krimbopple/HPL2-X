@@ -741,6 +741,7 @@ public:
 		gpSimpleCamera->SetMouseMode(true);
 		gpEngine->GetInput()->GetLowLevel()->LockInput(false);
 		gpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
+		gpEngine->GetGraphics()->GetLowLevel()->ShowCursor(true);
 	}
 
 	//--------------------------------------------------------------

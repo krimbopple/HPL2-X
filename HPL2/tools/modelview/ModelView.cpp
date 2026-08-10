@@ -419,7 +419,7 @@ public:
 				
 		/////////////////
 		//Floor
-		pMesh = gpEngine->GetResources()->GetMeshManager()->CreateMesh("modelview_rect.dae");
+		pMesh = gpEngine->GetResources()->GetMeshManager()->CreateMesh("viewer/modelview_rect.dae"); // had to steal this from the bunker... wtf !
 		gpFloor = mpWorld->CreateMeshEntity("Floor",pMesh,true);
 		gpFloor->SetMatrix(cMath::MatrixScale(6));
 		gpFloor->SetRenderFlagBit(eRenderableFlag_ShadowCaster, true);
@@ -528,6 +528,7 @@ public:
 	{
 		gpEngine->GetInput()->GetLowLevel()->LockInput(false);
 		gpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
+		gpEngine->GetGraphics()->GetLowLevel()->ShowCursor(true);
 
 		cRenderSettings *pSettings = gpSimpleCamera->GetViewport()->GetRenderSettings();
 		gpSimpleCamera->GetViewport()->AddRendererCallback(&renderCallback);

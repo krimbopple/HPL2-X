@@ -1624,14 +1624,14 @@ kGuiCallbackDeclaredFuncEnd(iEditorBase, EscapeKeyHandlerCallback);
 
 void iEditorBase::AppGotMouseFocus()
 {
-	// mpSet->SetDrawMouse(true);
+	mpSet->SetDrawMouse(true);
 }
 
 //----------------------------------------------------------------------------
 
 void iEditorBase::AppLostMouseFocus()
 {
-	// mpSet->SetDrawMouse(false);
+	mpSet->SetDrawMouse(true);
 }
 
 //----------------------------------------------------------------------------
