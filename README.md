@@ -1,7 +1,7 @@
 # HPL2-X
 
 HPL2-X aims to be a modernized fork of HPL2, based on [Amnesia64](https://github.com/buzer2020/Amnesia64).
-The goal of this project is to bring the classic HPL2 engine closer to the features, stability, and overall polish of HPL3, while keeping the engine open, accessible, and beginner-friendly.
+The goal of this project is to bring the classic HPL2 engine ~~closer to the features, stability, and overall polish of HPL3~~ (way too ambitious, but we'll get there!), while keeping the engine open, accessible, and beginner-friendly.
 
 ## Changelog
 
