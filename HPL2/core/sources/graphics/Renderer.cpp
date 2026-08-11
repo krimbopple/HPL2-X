@@ -73,6 +73,7 @@ namespace hpl {
 	bool iRenderer::mbParallaxEnabled=true;
 	int iRenderer::mlReflectionSizeDiv = 2;
 	bool iRenderer::mbRefractionEnabled=true;
+	bool iRenderer::mbShadowMapPCFEnabled=false;
 
 	//-----------------------------------------------------------------------
 

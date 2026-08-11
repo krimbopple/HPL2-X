@@ -192,6 +192,20 @@ cLuxMapHandler::cLuxMapHandler() : iLuxUpdateable("LuxMapHandler")
 	mpPostEffect_Sepia = pGraphics->CreatePostEffect(&sepiaParams);
 	pPostEffectComp->AddPostEffect(mpPostEffect_Sepia, 4);
 	mpPostEffect_Sepia->SetActive(false);
+
+	if(cGraphics::GetHDRRendering() && gpBase->mpConfigHandler->mbToneMap)
+	{
+		cPostEffectParams_ToneMap toneMapParams;
+		toneMapParams.mfExposure = gpBase->mpConfigHandler->mfToneMapExposure;
+		toneMapParams.mfGamma = gpBase->mpConfigHandler->mfToneMapGamma;
+		toneMapParams.mTonemapType = eTonemapType_ACES;
+		mpPostEffect_ToneMap = pGraphics->CreatePostEffect(&toneMapParams);
+		pPostEffectComp->AddPostEffect(mpPostEffect_ToneMap, 1);
+	}
+	else
+	{
+		mpPostEffect_ToneMap = NULL;
+	}
 	
 	//////////////////////////
 	//Saving

@@ -43,9 +43,10 @@ namespace hpl {
 		SetupRenderFunctions(mpGraphics->GetLowLevel());
 
 		cVector2l vSize = mpLowLevelGraphics->GetScreenSizeInt();
+		ePixelFormat format = cGraphics::GetHDRRendering() ? ePixelFormat_RGBA16 : ePixelFormat_RGBA;
 		for(int i=0; i<2; ++i)
 		{
-			mpFinalTempBuffer[i] = mpGraphics->GetTempFrameBuffer(vSize,ePixelFormat_RGBA,i);
+			mpFinalTempBuffer[i] = mpGraphics->GetTempFrameBuffer(vSize,format,i);
 		}
 	}
 

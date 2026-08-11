@@ -1130,11 +1130,14 @@ bool cLuxBase::InitEngine()
 	//renderer variables
 	iRenderer::SetShadowMapQuality((eShadowMapQuality)mpConfigHandler->mlShadowQuality);
 	iRenderer::SetShadowMapResolution((eShadowMapResolution)mpConfigHandler->mlShadowRes);
+	iRenderer::SetShadowMapPCFEnabled(mpConfigHandler->mbShadowMapPCF);
 	
 	iRenderer::SetParallaxQuality((eParallaxQuality)mpConfigHandler->mlParallaxQuality);
 	iRenderer::SetParallaxEnabled(mpConfigHandler->mbParallaxEnabled);
 
 	iRenderer::SetRefractionEnabled(mpConfigHandler->mbRefraction);
+
+	cGraphics::SetHDRRendering(mpConfigHandler->mbHDR);
 
 	cRendererDeferred::SetSSAOBufferSizeDiv(mpConfigHandler->mlSSAOResolution==0? 2 : 1);
 	cRendererDeferred::SetSSAONumOfSamples(mpConfigHandler->mlSSAOSamples);

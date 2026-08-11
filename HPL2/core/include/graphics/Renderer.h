@@ -302,6 +302,9 @@ namespace hpl {
 		static void SetRefractionEnabled(bool abX) { mbRefractionEnabled = abX;}
 		static bool GetRefractionEnabled(){ return mbRefractionEnabled;}
 
+		static void SetShadowMapPCFEnabled(bool abX){ mbShadowMapPCFEnabled = abX;}
+		static bool GetShadowMapPCFEnabled(){ return mbShadowMapPCFEnabled;}
+
 		
 		//Debug
 		tRenderableVec *GetShadowCasterVec(){ return &mvShadowCasters;}
@@ -490,6 +493,7 @@ namespace hpl {
 		static bool mbParallaxEnabled;
 		static int mlReflectionSizeDiv;
 		static bool mbRefractionEnabled;
+		static bool mbShadowMapPCFEnabled;
 	};
 
 	//---------------------------------------------

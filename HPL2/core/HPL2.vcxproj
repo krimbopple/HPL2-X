@@ -245,6 +245,7 @@
     <ClInclude Include="include\graphics\PostEffect_ColorConvTex.h" />
     <ClInclude Include="include\graphics\PostEffect_ImageTrail.h" />
     <ClInclude Include="include\graphics\PostEffect_RadialBlur.h" />
+    <ClInclude Include="include\graphics\PostEffect_ToneMap.h" />
     <ClInclude Include="include\scene\AnimationState.h" />
     <ClInclude Include="include\scene\Beam.h" />
     <ClInclude Include="include\scene\BillBoard.h" />
@@ -561,6 +562,7 @@
     <ClCompile Include="sources\graphics\PostEffect_ColorConvTex.cpp" />
     <ClCompile Include="sources\graphics\PostEffect_ImageTrail.cpp" />
     <ClCompile Include="sources\graphics\PostEffect_RadialBlur.cpp" />
+    <ClCompile Include="sources\graphics\PostEffect_ToneMap.cpp" />
     <ClCompile Include="sources\scene\AnimationState.cpp" />
     <ClCompile Include="sources\scene\Beam.cpp" />
     <ClCompile Include="sources\scene\BillBoard.cpp" />

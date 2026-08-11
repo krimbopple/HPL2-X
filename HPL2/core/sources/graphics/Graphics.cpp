@@ -50,12 +50,21 @@
 #include "graphics/PostEffect_ColorConvTex.h"
 #include "graphics/PostEffect_ImageTrail.h"
 #include "graphics/PostEffect_RadialBlur.h"
+#include "graphics/PostEffect_ToneMap.h"
 
 #include "graphics/RendererDeferred.h"
 #include "graphics/RendererWireFrame.h"
 #include "graphics/RendererSimple.h"
 
 namespace hpl {
+
+	//////////////////////////////////////////////////////////////////////////
+	// STATIC VARAIBLES
+	//////////////////////////////////////////////////////////////////////////
+
+	bool cGraphics::mbHDRRendering = false;
+
+	//-----------------------------------------------------------------------
 
 	//////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -212,6 +221,7 @@ namespace hpl {
 			AddPostEffectType(hplNew( cPostEffectType_ColorConvTex, (this, apResources)) );
 			AddPostEffectType(hplNew( cPostEffectType_ImageTrail, (this, apResources)) );
 			AddPostEffectType(hplNew( cPostEffectType_RadialBlur, (this, apResources)) );
+			AddPostEffectType(hplNew( cPostEffectType_ToneMap, (this, apResources)) );
 		}
 		
 		Log("--------------------------------------------------------\n\n");

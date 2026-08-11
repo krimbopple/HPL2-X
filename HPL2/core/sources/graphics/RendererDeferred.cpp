@@ -39,6 +39,7 @@
 #include "graphics/ProgramComboManager.h"
 #include "graphics/OcclusionQuery.h"
 #include "graphics/TextureCreator.h"
+#include "graphics/PostEffect_ToneMap.h"
 
 #include "resources/Resources.h"
 #include "resources/TextureManager.h"
@@ -164,6 +165,9 @@ namespace hpl {
 	#define kVar_afFalloffExp						20
 	#define kVar_afDepthDiffMul						21
 	#define kVar_afSkipEdgeLimit					22
+	#define kVar_afTonemapExposure					23
+	#define kVar_afTonemapGamma						24
+	#define kVar_alTonemapType						25
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -306,7 +310,8 @@ namespace hpl {
 		////////////////////////////////////
 		//Create Accumulation texture
 		mpAccumBufferTexture = mpGraphics->CreateTexture("AccumBiffer",eTextureType_Rect,eTextureUsage_RenderTarget);
-		mpAccumBufferTexture->CreateFromRawData(cVector3l(mvScreenSize.x, mvScreenSize.y,0),ePixelFormat_RGBA, NULL);
+		ePixelFormat accumFormat = cGraphics::GetHDRRendering() ? ePixelFormat_RGBA16 : ePixelFormat_RGBA;
+		mpAccumBufferTexture->CreateFromRawData(cVector3l(mvScreenSize.x, mvScreenSize.y,0),accumFormat, NULL);
 		mpAccumBufferTexture->SetWrapSTR(eTextureWrap_ClampToEdge);
 
 		////////////////////////////////////
@@ -417,6 +422,29 @@ namespace hpl {
 			mpSkyBoxProgram->SetShader(eGpuShaderType_Fragment, pFragShader);
 			mpSkyBoxProgram->Link();
 		}
+
+		////////////////////////////////////
+		//Create Tone map program
+		if(cGraphics::GetHDRRendering())
+		{
+			cParserVarContainer vars;
+			vars.Add("UseUv");
+			iGpuShader *pVtxShader = mpShaderManager->CreateShader("deferred_base_vtx.glsl",eGpuShaderType_Vertex,&vars);
+			iGpuShader *pFragShader = mpShaderManager->CreateShader("posteffect_tonemap_frag.glsl", eGpuShaderType_Fragment,&vars);
+
+			mpTonemapProgram = mpGraphics->CreateGpuProgram("DeferredTonemap");
+			mpTonemapProgram->SetShader(eGpuShaderType_Vertex, pVtxShader);
+			mpTonemapProgram->SetShader(eGpuShaderType_Fragment, pFragShader);
+			mpTonemapProgram->Link();
+
+			mpTonemapProgram->GetVariableAsId("afExposure", kVar_afTonemapExposure);
+			mpTonemapProgram->GetVariableAsId("afGamma", kVar_afTonemapGamma);
+			mpTonemapProgram->GetVariableAsId("alTonemapType", kVar_alTonemapType);
+		}
+		else
+		{
+			mpTonemapProgram = NULL;
+		}
 		
 		
 		////////////////////////////////////
@@ -486,6 +514,8 @@ namespace hpl {
 				if(mShadowMapQuality == eShadowMapQuality_High)		defaultVars.Add("ShadowMapQuality_High");
 				if(mShadowMapQuality == eShadowMapQuality_Medium)	defaultVars.Add("ShadowMapQuality_Medium");
 				if(mShadowMapQuality == eShadowMapQuality_Low)		defaultVars.Add("ShadowMapQuality_Low");
+
+				if(mbShadowMapPCFEnabled)							defaultVars.Add("ShadowMapPCF");
 
 				//Vertex shader will handles deferred lights
 				defaultVars.Add("DeferredLight");
@@ -762,6 +792,7 @@ namespace hpl {
 		/////////////////////////
 		//Gpu programs
 		mpGraphics->DestroyGpuProgram(mpSkyBoxProgram);
+		if(mpTonemapProgram) mpGraphics->DestroyGpuProgram(mpTonemapProgram);
 
 		mpProgramManager->DestroyShadersAndPrograms();
 	}
@@ -813,7 +844,17 @@ namespace hpl {
 
 		SetFlatProjection();
 
-		SetProgram(NULL);
+		if(cGraphics::GetHDRRendering() && mpTonemapProgram)
+		{
+			SetProgram(mpTonemapProgram);
+			mpTonemapProgram->SetFloat(kVar_afTonemapExposure, 1.0f);
+			mpTonemapProgram->SetFloat(kVar_afTonemapGamma, 2.2f);
+			mpTonemapProgram->SetInt(kVar_alTonemapType, (int)eTonemapType_ACES);
+		}
+		else
+		{
+			SetProgram(NULL);
+		}
 		SetTexture(0,mpAccumBufferTexture);
 		SetTextureRange(NULL, 1);
 

@@ -318,6 +318,9 @@
     <ClInclude Include="include\graphics\PostEffect_RadialBlur.h">
       <Filter>Graphics\PostEffectTypes</Filter>
     </ClInclude>
+    <ClInclude Include="include\graphics\PostEffect_ToneMap.h">
+      <Filter>Graphics\PostEffectTypes</Filter>
+    </ClInclude>
     <ClInclude Include="include\scene\AnimationState.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -1258,6 +1261,9 @@
       <Filter>Graphics\PostEffectTypes</Filter>
     </ClCompile>
     <ClCompile Include="sources\graphics\PostEffect_RadialBlur.cpp">
+      <Filter>Graphics\PostEffectTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\graphics\PostEffect_ToneMap.cpp">
       <Filter>Graphics\PostEffectTypes</Filter>
     </ClCompile>
     <ClCompile Include="sources\scene\AnimationState.cpp">

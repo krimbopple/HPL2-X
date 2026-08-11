@@ -316,6 +316,7 @@ namespace hpl {
 		iGpuProgram *mpSkyBoxProgram; 
 		iGpuProgram *mpLightStencilProgram;
 		iGpuProgram *mpLightBoxProgram[2];//1=SSAO used, 0=no SSAO
+		iGpuProgram *mpTonemapProgram;
 
 		cProgramComboManager* mpFogProgramManager;
 		

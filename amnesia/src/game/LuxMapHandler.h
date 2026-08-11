@@ -126,6 +126,7 @@ public:
 	iPostEffect *GetPostEffect_ImageTrail(){ return mpPostEffect_ImageTrail;}
 	iPostEffect *GetPostEffect_Sepia(){ return mpPostEffect_Sepia;}
 	iPostEffect *GetPostEffect_RadialBlur(){ return mpPostEffect_RadialBlur;}
+	iPostEffect *GetPostEffect_ToneMap(){ return mpPostEffect_ToneMap;}
 
 	void ClearSaveMapCollection();
 	cLuxSavedGameMapCollection *GetSavedMapCollection(){ return mpSavedGame;}
@@ -171,6 +172,7 @@ private:
 	iPostEffect *mpPostEffect_ImageTrail;
 	iPostEffect *mpPostEffect_Sepia;
 	iPostEffect *mpPostEffect_RadialBlur;
+	iPostEffect *mpPostEffect_ToneMap;
 
 	cLuxMapHandler_ChangeMap mMapChangeData;
 

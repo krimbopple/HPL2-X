@@ -64,6 +64,12 @@ public:
 	int mlShadowQuality;
 	int mlShadowRes;
 
+	bool mbHDR;
+	bool mbShadowMapPCF;
+	bool mbToneMap;
+	float mfToneMapExposure;
+	float mfToneMapGamma;
+
 	bool mbSSAOActive;
 	int mlSSAOSamples;
 	int mlSSAOResolution; //0= medium(div2), 1=high (same as screen resolution)

@@ -165,6 +165,10 @@ private:
 	cWidgetCheckBox *mpChBShadows;
 	cWidgetComboBox *mpCBShadowQuality;
 	cWidgetComboBox *mpCBShadowRes;
+	cWidgetCheckBox *mpChBShadowPCF;
+
+	cWidgetCheckBox *mpChBHDR;
+	cWidgetCheckBox *mpChBToneMap;
 
 	cWidgetCheckBox *mpChBWorldReflection;
 	cWidgetCheckBox *mpChBRefraction;

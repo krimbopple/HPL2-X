@@ -102,6 +102,13 @@ void cLuxConfigHandler::LoadMainConfig()
 	mbShadowsActive =	gpBase->mpMainConfig->GetBool("Graphics", "ShadowsActive", true);
 	mlShadowQuality =	gpBase->mpMainConfig->GetInt("Graphics", "ShadowQuality", eShadowMapQuality_Medium);
 	mlShadowRes =		gpBase->mpMainConfig->GetInt("Graphics", "ShadowResolution", eShadowMapResolution_High);
+	mbShadowMapPCF =	gpBase->mpMainConfig->GetBool("Graphics", "ShadowMapPCF", true);
+	
+	// HDR, off by default because it changes the tone of the game a bit
+	mbHDR =				gpBase->mpMainConfig->GetBool("Graphics", "HDR", false);
+	mbToneMap =			gpBase->mpMainConfig->GetBool("Graphics", "ToneMap", false);
+	mfToneMapExposure =	gpBase->mpMainConfig->GetFloat("Graphics", "ToneMapExposure", 1.0f);
+	mfToneMapGamma =	gpBase->mpMainConfig->GetFloat("Graphics", "ToneMapGamma", 2.2f);
 	
 	// Misc
 	mbWorldReflection = gpBase->mpMainConfig->GetBool("Graphics", "WorldReflection", true);
@@ -186,6 +193,12 @@ void cLuxConfigHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetBool("Graphics", "ShadowsActive", mbShadowsActive);
 	gpBase->mpMainConfig->SetInt("Graphics","ShadowQuality", mlShadowQuality);
 	gpBase->mpMainConfig->SetInt("Graphics","ShadowResolution", mlShadowRes);
+	gpBase->mpMainConfig->SetBool("Graphics", "ShadowMapPCF", mbShadowMapPCF);
+
+	gpBase->mpMainConfig->SetBool("Graphics", "HDR", mbHDR);
+	gpBase->mpMainConfig->SetBool("Graphics", "ToneMap", mbToneMap);
+	gpBase->mpMainConfig->SetFloat("Graphics", "ToneMapExposure", mfToneMapExposure);
+	gpBase->mpMainConfig->SetFloat("Graphics", "ToneMapGamma", mfToneMapGamma);
 
 	gpBase->mpMainConfig->SetInt("Graphics","ParallaxQuality", mlParallaxQuality);
 	gpBase->mpMainConfig->SetBool("Graphics", "ParallaxEnabled", mbParallaxEnabled);

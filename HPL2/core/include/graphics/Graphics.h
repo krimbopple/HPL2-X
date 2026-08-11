@@ -136,8 +136,12 @@ namespace hpl {
 		cDecalCreator* GetDecalCreator() {return mpDecalCreator;}
 		
 		bool GetScreenIsSetUp(){ return mbScreenIsSetup;}
-	
+
+		static void SetHDRRendering(bool abX){ mbHDRRendering = abX; }
+		static bool GetHDRRendering(){ return mbHDRRendering; }
+
 	private:
+		static bool mbHDRRendering;
 		iLowLevelGraphics *mpLowLevelGraphics;
 		iLowLevelResources *mpLowLevelResources;
 		cMeshCreator *mpMeshCreator;

@@ -690,6 +690,16 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 	cVector2f vGroupSize = cVector2f(520*fScale, 70*fScale);
 
 	////////////////////////////
+	// Disclaimer
+	cWidgetLabel *pDisclaimer = mpGuiSet->CreateWidgetLabel(cVector3f(10*fScale, 2*fScale, 0.1f), cVector2f(500*fScale, 40*fScale),
+		GetOptionsMenuString("GfxModsDisclaimer", _W("Note: Some options below (HDR, tone mapping) are enhancements that change how the game looks. They are off by default.")),
+		pMainFrame);
+	pDisclaimer->SetDefaultFontColor(cColor(0.85f, 0.85f, 0.6f));
+	pDisclaimer->SetWordWrap(true);
+
+	vPos.y += 42*fScale;
+
+	////////////////////////////
 	// Texture
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu","Material"), pMainFrame);
 	{
@@ -727,7 +737,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
     /////////////////////////////
 	// Shadows Group
-	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu", "Shadows"), pMainFrame);
+	pGroup = mpGuiSet->CreateWidgetGroup(vPos, cVector2f(vGroupSize.x, 100*fScale), kTranslate("OptionsMenu", "Shadows"), pMainFrame);
 	{
 		float fBorderSize = 15 * fScale;
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
@@ -755,6 +765,14 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		mpCBShadowRes = mpGuiSet->CreateWidgetComboBox(cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,25*fScale), _W(""), pLabel);
 		SetUpInput(pLabel, mpCBShadowRes, true, kTranslate("OptionsMenu","ShadowResTip"));
 
+		//vPosInGroup.x += mpCBShadowRes->GetSize().x + 15;
+		vPosInGroup.x += fItemSep;
+
+		/////////////////////////////
+		// Shadow PCF
+		cVector3f vPCFPos(fBorderSize, fBorderSize + mpChBShadows->GetSize().y + 12*fScale, 0.1f);
+		mpChBShadowPCF = mpGuiSet->CreateWidgetCheckBox(vPCFPos, 0, GetOptionsMenuString("ShadowPCF", _W("PCF Soft Shadows")), pGroup);
+		SetUpInput(NULL, mpChBShadowPCF, false, GetOptionsMenuString("ShadowPCFTip", _W("Gives shadows smoother, softer edges instead of hard, jagged ones.")));
 
 		// Set up values
 		tWStringVec vOptionStrings;
@@ -779,7 +797,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 	////////////////////////////
 	// Post Effects
-	pGroup = mpGuiSet->CreateWidgetGroup(vPos, vGroupSize, kTranslate("OptionsMenu","PostEffects"), pMainFrame);
+	pGroup = mpGuiSet->CreateWidgetGroup(vPos, cVector2f(vGroupSize.x, 115*fScale), kTranslate("OptionsMenu","PostEffects"), pMainFrame);
 	{
 		float fBorderSize = 15 * fScale;
 		float fInputSep = 10 * fScale;
@@ -831,6 +849,18 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		// Insanity
 		mpChBInsanity = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, kTranslate("OptionsMenu","Insanity"), pGroup);
 		SetUpInput(NULL, mpChBInsanity, false, kTranslate("OptionsMenu","InsanityTip"));
+
+		vPosInGroup.y += mpChBInsanity->GetSize().y + fInputSep;
+
+		// HDR
+		mpChBHDR = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, GetOptionsMenuString("HDR", _W("HDR Rendering")), pGroup);
+		SetUpInput(NULL, mpChBHDR, false, GetOptionsMenuString("HDRTip", _W("Preserves bright highlights instead of washing them out. Requires a restart.")));
+
+		vPosInGroup.y += mpChBHDR->GetSize().y + fInputSep;
+
+		// ToneMap
+		mpChBToneMap = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, GetOptionsMenuString("ToneMap", _W("Tone Mapping")), pGroup);
+		SetUpInput(NULL, mpChBToneMap, false, GetOptionsMenuString("ToneMapTip", _W("Adjusts brightness and color for a more film-like look.")));
 	}
 
 	vPos.y += pGroup->GetSize().y + 10*fScale;
@@ -953,6 +983,10 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		mpChBShadows->SetFocusNavigation(eUIArrow_Down, mpChBBloom);
 		mpCBShadowQuality->SetFocusNavigation(eUIArrow_Down, mpChBSepia);
 		mpCBShadowRes->SetFocusNavigation(eUIArrow_Down, mpChBInsanity);
+
+		mpChBShadowPCF->SetFocusNavigation(eUIArrow_Up, mpChBShadows);
+		mpChBShadowPCF->SetFocusNavigation(eUIArrow_Down, mpChBBloom);
+		mpChBShadowPCF->SetFocusNavigation(eUIArrow_Right, mpCBShadowRes);
 	}
 
 	{
@@ -968,7 +1002,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 		mpChBBloom->SetFocusNavigation(eUIArrow_Down, mpChBImageTrail);
 		mpChBSepia->SetFocusNavigation(eUIArrow_Down, mpChBRadialBlur);
-		mpChBInsanity->SetFocusNavigation(eUIArrow_Down, mpChBRadialBlur);
+		mpChBInsanity->SetFocusNavigation(eUIArrow_Down, mpChBHDR);
 
 		mpChBImageTrail->SetFocusNavigation(eUIArrow_Up, mpChBBloom);
 		mpChBRadialBlur->SetFocusNavigation(eUIArrow_Up, mpChBSepia);
@@ -978,6 +1012,11 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 		mpChBImageTrail->SetFocusNavigation(eUIArrow_Down, mpChBSSAO);
 		mpChBRadialBlur->SetFocusNavigation(eUIArrow_Down, mpCBSSAOSamples);
+
+		mpChBHDR->SetFocusNavigation(eUIArrow_Up, mpChBInsanity);
+		mpChBHDR->SetFocusNavigation(eUIArrow_Down, mpChBToneMap);
+		mpChBToneMap->SetFocusNavigation(eUIArrow_Up, mpChBHDR);
+		mpChBToneMap->SetFocusNavigation(eUIArrow_Down, mpCBSSAOResolution);
 	}
 
 	{
@@ -1345,6 +1384,7 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 			
 			mpCBShadowQuality->SetSelectedItem(aObj.GetVarInt("ShadowQuality"), true, false);
 			mpCBShadowRes->SetSelectedItem(aObj.GetVarInt("ShadowResolution"), true, false);
+			mpChBShadowPCF->SetChecked(aObj.GetVarBool("ShadowMapPCF"), false);
 
 			mpCBParallaxQuality->AddItem(kTranslate("Launcher","Off"));
 			mpCBParallaxQuality->AddItem(kTranslate("Launcher","On"));//Skipping medium since high and medium is really the same!
@@ -1405,6 +1445,10 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 			mpChBRadialBlur->SetChecked(aObj.GetVarBool("RadialBlurActive"), false); 
 			//Insanity
 			mpChBInsanity->SetChecked(aObj.GetVarBool("InsanityActive"), false); 
+			// HDR
+			mpChBHDR->SetChecked(aObj.GetVarBool("HDR"), false);
+			// ToneMap
+			mpChBToneMap->SetChecked(aObj.GetVarBool("ToneMap"), false);
 		}
 
 		// Gamma
@@ -1613,6 +1657,16 @@ void cLuxMainMenu_Options::ApplyChanges()
 		pCfgHdr->mbShadowsActive = mpChBShadows->IsChecked();
 		pCfgHdr->mlShadowQuality = mpCBShadowQuality->GetSelectedItem();
 		pCfgHdr->mlShadowRes = mpCBShadowRes->GetSelectedItem();
+		pCfgHdr->mbShadowMapPCF = mpChBShadowPCF->IsChecked();
+
+		// HDR
+		bool bHDRChanged = pCfgHdr->mbHDR != mpChBHDR->IsChecked();
+		pCfgHdr->mbHDR = mpChBHDR->IsChecked();
+		pCfgHdr->mbToneMap = mpChBToneMap->IsChecked();
+		if(bHDRChanged)
+		{
+			pCfgHdr->SetGameNeedsRestart();
+		}
 
 		// Water
 		pCfgHdr->mbWorldReflection = mpChBWorldReflection->IsChecked();
@@ -1948,6 +2002,9 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("SepiaActive", pMapHdlr->GetPostEffect_Sepia()->IsDisabled()==false);
 		aObj.AddVarBool("RadialBlurActive", pMapHdlr->GetPostEffect_RadialBlur()->IsDisabled()==false);
 		aObj.AddVarBool("InsanityActive", pPostEffects->GetInsanity()->IsDisabled()==false);
+		aObj.AddVarBool("HDR", gpBase->mpConfigHandler->mbHDR);
+		aObj.AddVarBool("ToneMap", gpBase->mpConfigHandler->mbToneMap);
+		aObj.AddVarBool("ShadowMapPCF", gpBase->mpConfigHandler->mbShadowMapPCF);
 
 
 		///////////////////
@@ -2048,6 +2105,9 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("SepiaActive", mpChBSepia->IsChecked());
 		aObj.AddVarBool("RadialBlurActive", mpChBRadialBlur->IsChecked());
 		aObj.AddVarBool("InsanityActive", mpChBInsanity->IsChecked());
+		aObj.AddVarBool("HDR", mpChBHDR->IsChecked());
+		aObj.AddVarBool("ToneMap", mpChBToneMap->IsChecked());
+		aObj.AddVarBool("ShadowMapPCF", mpChBShadowPCF->IsChecked());
 
 		///////////////////
 		// Gamma
