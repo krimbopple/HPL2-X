@@ -95,6 +95,9 @@ public:
 	bool GetSmoothMouse() { return mbSmoothMouse; }
 	void SetSmoothMouse(bool abX) { mbSmoothMouse = abX; }
 
+	bool GetRawMouseInput() { return mbRawMouseInput; }
+	void SetRawMouseInput(bool abX);
+
 	float GetMouseSensitivity() { return mfMouseSensitivity; }
 	void SetMouseSensitivity(float afX);
 
@@ -167,6 +170,7 @@ private:
 
 	bool mbSmoothMouse;
 	bool mbInvertMouse;
+	bool mbRawMouseInput;
 
 	double mfMouseActiveAt;
 

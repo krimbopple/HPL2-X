@@ -52,6 +52,7 @@ public:
 	cVector2l mvScreenSize;
     int mlDisplay;
 	bool mbFullscreen;
+	int mlWindowMode; // 0 = windowed 1 = fullscreen 2 = borderless
 	int mlMultisampling;
 	bool mbVSync;
 	bool mbAdaptiveVSync;

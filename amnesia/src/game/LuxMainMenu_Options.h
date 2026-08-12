@@ -73,6 +73,7 @@ private:
 
 	float GetGamma() { return GetSliderValue(mpSGamma, mfGammaMin, mfGammaMax); }
 	float GetSensitivity() { return GetSliderValue(mpSMouseSensitivity, mfMouseSensitivityMin, mfMouseSensitivityMax); }
+	float GetGameFOV() { return GetSliderValue(mpSGameFOV, mfFOVMin, mfFOVMax); }
 #ifdef USE_GAMEPAD
 	float GetGamepadLookSensitivity() { return GetSliderValue(mpSGamepadLookSensitivity, mfGamepadLookSensitivityMin, mfGamepadLookSensitivityMax); }
 #endif
@@ -80,6 +81,7 @@ private:
 
 	void SetGammaLabelString(float afX);
 	void SetSensitivityLabelString(float afX);
+	void SetGameFOVLabelString(float afX);
 	void SetGamepadLookSensitivityLabelString(float afX);
 	void SetVolumeLabelString(float afX);
 
@@ -146,11 +148,15 @@ private:
 	cWidgetComboBox *mpCBFocusIconStyle;
 	cWidgetCheckBox *mpChBShowCommentary;
 	cWidgetCheckBox *mpChBPauseOnFocusLoss;
+	cWidgetCheckBox *mpChBQuickSave;
+
+	cWidgetLabel	*mpLGameFOV;
+	cWidgetSlider	*mpSGameFOV;
 	
 	// Graphics;
 	cWidgetDummy	*mpDBasicGfxOptions;
 	cWidgetComboBox *mpCBResolution;
-	cWidgetCheckBox *mpChBFullScreen;
+	cWidgetComboBox *mpCBWindowMode;
 	cWidgetCheckBox *mpChBVSync;
 //	cWidgetCheckBox *mpChBAdaptiveVSync;
 	cWidgetCheckBox *mpChBUncapFPS;
@@ -199,6 +205,7 @@ private:
 	// Input
 	cWidgetCheckBox *mpChBInvertMouse;
 	cWidgetCheckBox *mpChBSmoothMouse;
+	cWidgetCheckBox *mpChBRawMouseInput;
 
 	cWidgetLabel	*mpLMouseSensitivity;
 	cWidgetSlider	*mpSMouseSensitivity;
@@ -225,6 +232,10 @@ private:
 	float mfMouseSensitivityMin;
 	float mfMouseSensitivityMax;
 	float mfMouseSensitivityStep;
+
+	float mfFOVMin;
+	float mfFOVMax;
+	float mfFOVStep;
 	
 #ifdef USE_GAMEPAD
 	float mfGamepadLookSensitivityMin;
@@ -278,6 +289,9 @@ private:
 
 	bool MouseSensitivitySlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(MouseSensitivitySlider_OnMove);
+
+	bool GameFOVSlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(GameFOVSlider_OnMove);
 
 #ifdef USE_GAMEPAD
 	bool GamepadLookSensitivitySlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);

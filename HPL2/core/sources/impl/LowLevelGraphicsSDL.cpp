@@ -661,6 +661,13 @@ namespace hpl {
 #endif
 	}
 
+	void cLowLevelGraphicsSDL::SetRawMouseInput(bool abX)
+	{
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, abX ? "0" : "1");
+#endif
+	}
+
     void cLowLevelGraphicsSDL::SetWindowCaption(const tString &asName)
     {
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -792,37 +799,53 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
-	bool cLowLevelGraphicsSDL::SetWindowSize(const cVector2l& avSize, bool abFullscreen)
+	bool cLowLevelGraphicsSDL::SetWindowSize(const cVector2l& avSize, bool abFullscreen, bool abBorderless)
 	{
 #if SDL_VERSION_ATLEAST(2, 0, 0)
         if(mpScreen==NULL) return false;
 
-        if(avSize.x <= 0 || avSize.y <= 0) return false;
+        // Borderless is the only case that allows a zero size
+        if(avSize.x <= 0 || avSize.y <= 0)
+        {
+            if(abBorderless==false) return false;
+        }
 
         if(SDL_SetWindowFullscreen(mpScreen, 0) != 0)
         {
             Error("Could not clear fullscreen before resize! %s\n", SDL_GetError());
         }
 
-        SDL_SetWindowSize(mpScreen, avSize.x, avSize.y);
-
-        if(abFullscreen)
+        if(abBorderless)
         {
-            if(SDL_SetWindowFullscreen(mpScreen, SDL_WINDOW_FULLSCREEN) != 0)
+            if(SDL_SetWindowFullscreen(mpScreen, SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)
             {
-                Error("Could not set fullscreen mode! %s\n", SDL_GetError());
+                Error("Could not set borderless fullscreen mode! %s\n", SDL_GetError());
                 return false;
             }
         }
         else
         {
-            SDL_SetWindowPosition(mpScreen, SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay), SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay));
+            if(avSize.x > 0 && avSize.y > 0)
+                SDL_SetWindowSize(mpScreen, avSize.x, avSize.y);
+
+            if(abFullscreen)
+            {
+                if(SDL_SetWindowFullscreen(mpScreen, SDL_WINDOW_FULLSCREEN) != 0)
+                {
+                    Error("Could not set fullscreen mode! %s\n", SDL_GetError());
+                    return false;
+                }
+            }
+            else
+            {
+                SDL_SetWindowPosition(mpScreen, SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay), SDL_WINDOWPOS_CENTERED_DISPLAY(mlDisplay));
+            }
         }
 
         int w,h;
         SDL_GetWindowSize(mpScreen, &w, &h);
         mvScreenSize = cVector2l(w, h);
-        mbFullscreen = abFullscreen;
+        mbFullscreen = abFullscreen || abBorderless;
 
         return true;
 #else

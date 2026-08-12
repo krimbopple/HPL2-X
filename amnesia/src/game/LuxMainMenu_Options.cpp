@@ -29,6 +29,7 @@
 #include "LuxPlayerHelpers.h"
 #include "LuxPlayer.h"
 #include "LuxHelpFuncs.h"
+#include "LuxDebugHandler.h"
 
 //////////////////////////////////////////////////////////////////////////
 // HELPERS
@@ -157,7 +158,7 @@ cResourceVarsObject cLuxMainMenu_Options::mCurrentValues = cResourceVarsObject()
 
 cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSkin) : iLuxMainMenuWindow(apGuiSet, apGuiSkin)
 {
-	mvWindowSize = cVector2f(620,460) * LuxCalcGuiWindowScale();
+	mvWindowSize = cVector2f(620,510) * LuxCalcGuiWindowScale();
 
 	mbTipFadeRestart = false;
 	mbTipWidgetUpdated = true;
@@ -171,6 +172,10 @@ cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSki
 	mfMouseSensitivityMin = 0.2f;
 	mfMouseSensitivityStep = 0.1f;
 	mfMouseSensitivityMax = 5.0f;
+
+	mfFOVMin = 50.0f;
+	mfFOVStep = 1.0f;
+	mfFOVMax = 120.0f;
 
 #ifdef USE_GAMEPAD
 	mfGamepadLookSensitivityMin = 0.5f;
@@ -394,6 +399,13 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	vPos.y += mpChBShowCrosshair->GetSize().y + 15*fScale;
 
 	///////////////////////////////////////////////
+	// Quick Save/Load Checkbox
+	mpChBQuickSave = mpGuiSet->CreateWidgetCheckBox(vPos, 0, GetOptionsMenuString("QuickSave", _W("Quick save / load")), apTab);
+	SetUpInput(NULL, mpChBQuickSave, false, GetOptionsMenuString("QuickSaveTip", _W("Allow quick saving and loading at any time with F4 and F5.")));
+
+	vPos.y += mpChBQuickSave->GetSize().y + 15*fScale;
+
+	///////////////////////////////////////////////
 	// Focus Icon style Combobox
 	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu","FocusIconStyle"), apTab);
 	mpCBFocusIconStyle = mpGuiSet->CreateWidgetComboBox(vPos + cVector3f(pLabel->GetSize().x + 5*fScale,-2*fScale,0), cVector2f(150*fScale, 25*fScale), _W(""), apTab);
@@ -401,6 +413,14 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	mpCBFocusIconStyle->AddItem(kTranslate("OptionsMenu", "FocusIconStyleDefault"));
 	mpCBFocusIconStyle->AddItem(kTranslate("OptionsMenu", "FocusIconStyleSimple"));
 	vPos.y += pLabel->GetSize().y + 15*fScale;
+
+	///////////////////////////////////////////////
+	// Field of view Slider
+	pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, GetOptionsMenuString("FOV", _W("Field of View")), apTab);
+	mpSGameFOV = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(150*fScale,20*fScale), 0, pLabel);
+	SetUpInput(pLabel, mpSGameFOV, false, GetOptionsMenuString("FOVTip", _W("Vertical field of view in degrees. A wider FOV can help with motion sickness.")));
+	SetUpSlider(mpSGameFOV, mfFOVMin, mfFOVMax, mfFOVStep, kGuiCallback(GameFOVSlider_OnMove), &mpLGameFOV);
+	vPos.y += mpSGameFOV->GetLocalPosition().y + mpSGameFOV->GetSize().y + 15*fScale;
 
 	//////////////////////////////////
 	// Commentary
@@ -426,20 +446,22 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	mpChBShowEffectSubtitles->SetFocusNavigation(eUIArrow_Down, mpChBShowHints);
 	mpChBShowHints->SetFocusNavigation(eUIArrow_Down, mpChBShowDeathHints);
 	mpChBShowDeathHints->SetFocusNavigation(eUIArrow_Down, mpChBShowCrosshair);
-	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Down, mpCBFocusIconStyle);
-	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Down, mpCBFocusIconStyle);
+	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Down, mpChBQuickSave);
+	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Down, mpChBQuickSave);
+	mpChBQuickSave->SetFocusNavigation(eUIArrow_Down, mpCBFocusIconStyle);
+	mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Down, mpSGameFOV);
 	if(mbShowCommentary)
 	{
-		mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Down, mpChBShowCommentary);
+		mpSGameFOV->SetFocusNavigation(eUIArrow_Down, mpChBShowCommentary);
 		mpChBShowCommentary->SetFocusNavigation(eUIArrow_Down, mpBOK);
 
 		pLastWidget = mpChBShowCommentary;
 	}
 	else
 	{
-		mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Down, mpBOK);
+		mpSGameFOV->SetFocusNavigation(eUIArrow_Down, mpBOK);
 
-		pLastWidget = mpCBFocusIconStyle;
+		pLastWidget = mpSGameFOV;
 	}
 
 	apTab->SetUserData(pLastWidget);
@@ -453,9 +475,11 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	mpChBShowDeathHints->SetFocusNavigation(eUIArrow_Up, mpChBShowHints);
 	mpChBShowCrosshair->SetFocusNavigation(eUIArrow_Up, mpChBShowDeathHints);
 	mpChBPauseOnFocusLoss->SetFocusNavigation(eUIArrow_Up, mpChBShowDeathHints);
-	mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Up, mpChBShowCrosshair);
+	mpChBQuickSave->SetFocusNavigation(eUIArrow_Up, mpChBShowCrosshair);
+	mpCBFocusIconStyle->SetFocusNavigation(eUIArrow_Up, mpChBQuickSave);
+	mpSGameFOV->SetFocusNavigation(eUIArrow_Up, mpCBFocusIconStyle);
 	if(mbShowCommentary)
-		mpChBShowCommentary->SetFocusNavigation(eUIArrow_Up, mpCBFocusIconStyle);
+		mpChBShowCommentary->SetFocusNavigation(eUIArrow_Up, mpSGameFOV);
 
 	// Left/Right
 	mpChBShowSubtitles->SetFocusNavigation(eUIArrow_Right, mpChBShowEffectSubtitles);
@@ -564,14 +588,19 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		vPosInGroup.x += mpCBResolution->GetSize().x + 100*fScale;
 
 		/////////////////////////////////
-		// Full screen and Vsync
-		mpChBFullScreen = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,2*fScale,0), -1, kTranslate("OptionsMenu","FullScreen"), pGroup);
-		SetUpInput(NULL, mpChBFullScreen, false, kTranslate("OptionsMenu","FullScreenTip"));
+		// Window Mode and Vsync
+		pLabel = mpGuiSet->CreateWidgetLabel(vPosInGroup + cVector3f(0,2*fScale,0), -1, GetOptionsMenuString("WindowMode", _W("Window Mode")), pGroup);
+		mpCBWindowMode = mpGuiSet->CreateWidgetComboBox(pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(120*fScale, 25*fScale), _W(""), pGroup);
+		SetUpInput(pLabel, mpCBWindowMode, false, GetOptionsMenuString("WindowModeTip", _W("Windowed runs in a bordered window, Fullscreen takes over the screen, Borderless fills the screen without the exclusive fullscreen mode.")));
+		mpCBWindowMode->AddItem(GetOptionsMenuString("WindowModeWindowed", _W("Windowed")));
+		mpCBWindowMode->AddItem(GetOptionsMenuString("WindowModeFullscreen", _W("Fullscreen")));
+		mpCBWindowMode->AddItem(GetOptionsMenuString("WindowModeBorderless", _W("Borderless")));
 
-		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10*fScale,0), 0, kTranslate("OptionsMenu","VSync"), pGroup);
+		cVector3f vVsyncPos = vPosInGroup + cVector3f(0, 2*fScale + pLabel->GetSize().y + 5*fScale + mpCBWindowMode->GetSize().y + 10*fScale, 0);
+		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vVsyncPos, 0, kTranslate("OptionsMenu","VSync"), pGroup);
 		SetUpInput(NULL, mpChBVSync, false, kTranslate("OptionsMenu","VSyncTip"));
 
-		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(0,mpChBFullScreen->GetSize().y+10*fScale+mpChBVSync->GetSize().y+10*fScale,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
+		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vVsyncPos + cVector3f(0,mpChBVSync->GetSize().y+10*fScale,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
 		SetUpInput(NULL, mpChBUncapFPS, false, GetOptionsMenuString("UncapFPSTip", _W("Render as fast as possible instead of locking the game to 60 FPS.")));
 
 
@@ -641,18 +670,18 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	mpCBMSAA->AddItem(_W("8X"));
 
 	mpCBResolution->SetFocusNavigation(eUIArrow_Down, mpCBSimulationRate);
-	mpCBResolution->SetFocusNavigation(eUIArrow_Right, mpChBFullScreen);
+	mpCBResolution->SetFocusNavigation(eUIArrow_Right, mpCBWindowMode);
 
 	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Up, mpCBResolution);
 	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Right, mpChBUncapFPS);
 	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 
-	mpChBFullScreen->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
-	mpChBFullScreen->SetFocusNavigation(eUIArrow_Down, mpChBVSync);
+	mpCBWindowMode->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
+	mpCBWindowMode->SetFocusNavigation(eUIArrow_Down, mpChBVSync);
 
 	mpChBVSync->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
 //	mpChBVSync->SetFocusNavigation(eUIArrow_Right, mpChBAdaptiveVSync);
-	mpChBVSync->SetFocusNavigation(eUIArrow_Up, mpChBFullScreen);
+	mpChBVSync->SetFocusNavigation(eUIArrow_Up, mpCBWindowMode);
 	mpChBVSync->SetFocusNavigation(eUIArrow_Down, mpChBUncapFPS);
 
 	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Left, mpCBSimulationRate);
@@ -1072,6 +1101,13 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 	vPos.y += mpChBSmoothMouse->GetSize().y + 15*fScale;
 
 	/////////////////////////////
+	// Raw Mouse Input
+	mpChBRawMouseInput = mpGuiSet->CreateWidgetCheckBox(vPos, 0, GetOptionsMenuString("RawMouseInput", _W("Raw mouse input")), apTab);
+	SetUpInput(NULL, mpChBRawMouseInput, false, GetOptionsMenuString("RawMouseInputTip", _W("Reads the mouse directly, bypassing the OS mouse acceleration for a more precise feel.")));
+
+	vPos.y += mpChBRawMouseInput->GetSize().y + 15*fScale;
+
+	/////////////////////////////
 	// Mouse Sensitivity
 	cWidgetLabel* pLabel = mpGuiSet->CreateWidgetLabel(vPos, -1, kTranslate("OptionsMenu", "MouseSensitivity"), apTab);
 	mpSMouseSensitivity = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(100*fScale,20*fScale), 0, pLabel);
@@ -1130,7 +1166,8 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 
 	// Down
 	mpChBInvertMouse->SetFocusNavigation(eUIArrow_Down, mpChBSmoothMouse);
-	mpChBSmoothMouse->SetFocusNavigation(eUIArrow_Down, mpSMouseSensitivity);
+	mpChBSmoothMouse->SetFocusNavigation(eUIArrow_Down, mpChBRawMouseInput);
+	mpChBRawMouseInput->SetFocusNavigation(eUIArrow_Down, mpSMouseSensitivity);
 	mpSMouseSensitivity->SetFocusNavigation(eUIArrow_Down, mpBKeyConfig);	
 #ifdef USE_GAMEPAD
 	mpSMouseSensitivity->SetFocusNavigation(eUIArrow_Down, mpChBGamepadInvertLook);	
@@ -1141,7 +1178,8 @@ void cLuxMainMenu_Options::AddInputOptions(cWidgetTab* apTab)
 	
 	// Up
 	mpChBSmoothMouse->SetFocusNavigation(eUIArrow_Up, mpChBInvertMouse);
-	mpSMouseSensitivity->SetFocusNavigation(eUIArrow_Up, mpChBSmoothMouse);
+	mpChBRawMouseInput->SetFocusNavigation(eUIArrow_Up, mpChBSmoothMouse);
+	mpSMouseSensitivity->SetFocusNavigation(eUIArrow_Up, mpChBRawMouseInput);
 	mpBKeyConfig->SetFocusNavigation(eUIArrow_Up, mpSMouseSensitivity);
 #ifdef USE_GAMEPAD
 	mpChBGamepadInvertLook->SetFocusNavigation(eUIArrow_Up, mpSMouseSensitivity);
@@ -1207,10 +1245,16 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 
 		mpChBShowCrosshair->SetChecked(aObj.GetVarBool("ShowCrosshair"), false);
 		mpChBPauseOnFocusLoss->SetChecked(aObj.GetVarBool("PauseOnFocusLoss"), false);
+		mpChBQuickSave->SetChecked(aObj.GetVarBool("QuickSave"), false);
 
 		mpCBFocusIconStyle->SetSelectedItem(aObj.GetVarInt("FocusIconStyle"), false, false);
 		if(mpCBFocusIconStyle->GetSelectedItem()==-1)
 			mpCBFocusIconStyle->SetSelectedItem(0, false, true);
+
+		// FOV
+		float fFOV = aObj.GetVarFloat("FOV");
+		SetSliderValue(mpSGameFOV, fFOV, false, mfFOVMin, mfFOVMax);
+		SetGameFOVLabelString(fFOV);
 
 		if(mbShowCommentary)
 		{
@@ -1316,8 +1360,8 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		}
 
 		/////////////////////////
-		// Fullscreen & vsync
-		mpChBFullScreen->SetChecked(aObj.GetVarBool("FullScreen"), false);
+		// Window mode & vsync
+		mpCBWindowMode->SetSelectedItem(aObj.GetVarInt("WindowMode"), false, false);
 		mpChBVSync->SetChecked(aObj.GetVarBool("VSync"), false);
 //		mpChBAdaptiveVSync->SetChecked(aObj.GetVarBool("AdaptiveVsync"), false);
 		mpChBUncapFPS->SetChecked(aObj.GetVarBool("UncapFPS"), false);
@@ -1464,6 +1508,7 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 	// Input
 	mpChBInvertMouse->SetChecked(aObj.GetVarBool("InvertMouse"), false); 
 	mpChBSmoothMouse->SetChecked(aObj.GetVarBool("SmoothMouse"), false); 
+	mpChBRawMouseInput->SetChecked(aObj.GetVarBool("RawMouseInput"), false); 
 
 	float fSensitivity = aObj.GetVarFloat("MouseSensitivity");
 	SetSliderValue(mpSMouseSensitivity, fSensitivity, false, mfMouseSensitivityMin, mfMouseSensitivityMax);
@@ -1591,6 +1636,10 @@ void cLuxMainMenu_Options::ApplyChanges()
 		gpBase->mpPlayer->SetShowCrosshair(mpChBShowCrosshair->IsChecked());
 
 		gpBase->mpPlayer->SetFocusIconStyle((eLuxFocusIconStyle)mpCBFocusIconStyle->GetSelectedItem());
+
+		gpBase->mpPlayer->SetFOV(GetGameFOV());
+
+		gpBase->mpDebugHandler->SetAllowQuickSave(mpChBQuickSave->IsChecked());
 	}
 
 	
@@ -1602,13 +1651,16 @@ void cLuxMainMenu_Options::ApplyChanges()
 		cMaterialManager* pMatMgr = gpBase->mpEngine->GetResources()->GetMaterialManager();
 
         const cVideoMode vidMode = mvScreenSizes[mpCBResolution->GetSelectedItem()];
-		bool bFullscreen = mpChBFullScreen->IsChecked();
+		int lWindowMode = mpCBWindowMode->GetSelectedItem();
+		bool bFullscreen = lWindowMode != 0;
+		bool bBorderless = lWindowMode == 2;
 
 		bool bDisplayChanged = (vidMode.mlDisplay != pCfgHdr->mlDisplay);
-		bool bResolutionChanged = (vidMode.mvScreenSize != pCfgHdr->mvScreenSize) || bDisplayChanged || (bFullscreen != pCfgHdr->mbFullscreen);
+		bool bResolutionChanged = (vidMode.mvScreenSize != pCfgHdr->mvScreenSize) || bDisplayChanged || (lWindowMode != pCfgHdr->mlWindowMode);
 
 		pCfgHdr->mvScreenSize = vidMode.mvScreenSize;
         pCfgHdr->mlDisplay = vidMode.mlDisplay;
+		pCfgHdr->mlWindowMode = lWindowMode;
 		pCfgHdr->mbFullscreen = bFullscreen;
 		pCfgHdr->mbVSync = mpChBVSync->IsChecked();
 //		pCfgHdr->mbAdaptiveVSync = mpChBAdaptiveVSync->IsChecked();
@@ -1625,7 +1677,14 @@ void cLuxMainMenu_Options::ApplyChanges()
 			bool bAppliedLive = false;
 			if(vidMode.isFullScreenDesktop()==false && bDisplayChanged==false)
 			{
-				bAppliedLive = pGfx->SetScreenSize(vidMode.mvScreenSize, bFullscreen);
+				if(bBorderless)
+				{
+					bAppliedLive = pGfx->SetScreenSize(cVector2l(0,0), true, true);
+				}
+				else
+				{
+					bAppliedLive = pGfx->SetScreenSize(vidMode.mvScreenSize, bFullscreen, false);
+				}
 			}
 
 			if(bAppliedLive)
@@ -1711,6 +1770,7 @@ void cLuxMainMenu_Options::ApplyChanges()
 	// Input
 	gpBase->mpInputHandler->SetInvertMouse(mpChBInvertMouse->IsChecked());
 	gpBase->mpInputHandler->SetSmoothMouse(mpChBSmoothMouse->IsChecked());
+	gpBase->mpInputHandler->SetRawMouseInput(mpChBRawMouseInput->IsChecked());
 
 	gpBase->mpInputHandler->SetMouseSensitivity(GetSensitivity());
 
@@ -1750,6 +1810,13 @@ void cLuxMainMenu_Options::SetGammaLabelString(float afX)
 void cLuxMainMenu_Options::SetSensitivityLabelString(float afX)
 {
 	SetSliderLabelString(mpLMouseSensitivity, afX, mfMouseSensitivityMin, mfMouseSensitivityMax);
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxMainMenu_Options::SetGameFOVLabelString(float afX)
+{
+	SetSliderLabelString(mpLGameFOV, afX, mfFOVMin, mfFOVMax, _W(""), _W(""));
 }
 
 //-----------------------------------------------------------------------
@@ -1938,6 +2005,8 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarInt("FocusIconStyle", gpBase->mpPlayer->GetFocusIconStyle());
 		aObj.AddVarBool("ShowCommentary", gpBase->mpMapHandler->GetShowCommentary());
 		aObj.AddVarBool("PauseOnFocusLoss", gpBase->mpConfigHandler->mbSleepWhenOutOfFocus);
+		aObj.AddVarBool("QuickSave", gpBase->mpDebugHandler->GetAllowQuickSave());
+		aObj.AddVarFloat("FOV", gpBase->mpPlayer->GetFOV());
 
 		// Language
 		aObj.AddVarString("Language", gpBase->mpConfigHandler->msLangFile);
@@ -1953,8 +2022,8 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
         aObj.AddVarInt("Display", gpBase->mpConfigHandler->mlDisplay);
 
 		/////////////////////////
-		// Fullscreen & vsync
-		aObj.AddVarBool("FullScreen", gpBase->mpConfigHandler->mbFullscreen);
+		// Window mode & vsync
+		aObj.AddVarInt("WindowMode", gpBase->mpConfigHandler->mlWindowMode);
 		aObj.AddVarBool("VSync", gpBase->mpConfigHandler->mbVSync);
 		aObj.AddVarBool("AdaptiveVsync", gpBase->mpConfigHandler->mbAdaptiveVSync);
 		aObj.AddVarBool("UncapFPS", gpBase->mpConfigHandler->mbUncapFPS);
@@ -2016,6 +2085,7 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 	// Input
 	aObj.AddVarBool("InvertMouse", gpBase->mpInputHandler->GetInvertMouse());
 	aObj.AddVarBool("SmoothMouse", gpBase->mpInputHandler->GetSmoothMouse());
+	aObj.AddVarBool("RawMouseInput", gpBase->mpInputHandler->GetRawMouseInput());
 	aObj.AddVarFloat("MouseSensitivity", gpBase->mpInputHandler->GetMouseSensitivity());
 
 #ifdef USE_GAMEPAD
@@ -2044,6 +2114,8 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("ShowCrosshair",	mpChBShowCrosshair->IsChecked());
 		aObj.AddVarInt("FocusIconStyle",	mpCBFocusIconStyle->GetSelectedItem());
 		aObj.AddVarBool("PauseOnFocusLoss", mpChBPauseOnFocusLoss->IsChecked());
+		aObj.AddVarBool("QuickSave",		mpChBQuickSave->IsChecked());
+		aObj.AddVarFloat("FOV",				GetGameFOV());
 
 		aObj.AddVarString("Language",		cString::To8Char(mvLangFiles[mpCBLanguage->GetSelectedItem()]));
 	}
@@ -2059,8 +2131,8 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
         aObj.AddVarInt("Display", vResolution.mlDisplay); 
 
 		/////////////////////////
-		// Fullscreen & vsync
-		aObj.AddVarBool("FullScreen",	mpChBFullScreen->IsChecked());
+		// Window mode & vsync
+		aObj.AddVarInt("WindowMode",	mpCBWindowMode->GetSelectedItem());
 		aObj.AddVarBool("VSync",		mpChBVSync->IsChecked());
 		aObj.AddVarBool("UncapFPS",		mpChBUncapFPS->IsChecked());
 		aObj.AddVarInt("SimulationRate", GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem()));
@@ -2118,6 +2190,7 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 	// Input
 	aObj.AddVarBool("InvertMouse", mpChBInvertMouse->IsChecked());
 	aObj.AddVarBool("SmoothMouse", mpChBSmoothMouse->IsChecked());
+	aObj.AddVarBool("RawMouseInput", mpChBRawMouseInput->IsChecked());
 	aObj.AddVarFloat("MouseSensitivity", GetSensitivity());
 
 #ifdef USE_GAMEPAD
@@ -2306,6 +2379,19 @@ kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, MouseSensitivitySlider_OnMove)
 
 //-----------------------------------------------------------------------
 
+bool cLuxMainMenu_Options::GameFOVSlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	float fFOV = GetGameFOV();
+	SetGameFOVLabelString(fFOV);
+
+	gpBase->mpPlayer->SetFOV(fFOV);
+
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, GameFOVSlider_OnMove);
+
+//-----------------------------------------------------------------------
+
 #ifdef USE_GAMEPAD
 bool cLuxMainMenu_Options::GamepadLookSensitivitySlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData)
 {
@@ -2409,6 +2495,7 @@ bool cLuxMainMenu_Options::PressCancel(iWidget* apWidget, const cGuiMessageData&
 	//}
 	gpBase->mpEngine->GetGraphics()->GetLowLevel()->SetGammaCorrection(mInitialValues.GetVarFloat("Gamma"));
 	gpBase->mpInputHandler->SetMouseSensitivity(mInitialValues.GetVarFloat("MouseSensitivity"));
+	gpBase->mpPlayer->SetFOV(mInitialValues.GetVarFloat("FOV"));
 #ifdef USE_GAMEPAD
 	gpBase->mpInputHandler->SetGamepadLookSensitivity(mInitialValues.GetVarFloat("GamepadLookSensitivity"));
 #endif

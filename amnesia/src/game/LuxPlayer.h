@@ -180,6 +180,9 @@ public:
 	void SetLookSpeedMul(float afX){ mfLookSpeedMul = afX;}
 	float GetLookSpeedMul() { return mfLookSpeedMul;}
 
+	void SetFOV(float afDegrees);
+	float GetFOV() { return cMath::ToDeg(mfFOV); }
+
 	void SetFocusText(const tWString &asText);
 
 	int GetCoins(){ return mlCoins;}

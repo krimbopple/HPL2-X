@@ -70,6 +70,8 @@ namespace hpl {
 
 		virtual void SetRelativeMouse(bool abX)=0;
 
+        virtual void SetRawMouseInput(bool abX)=0;
+
         virtual void SetWindowCaption(const tString& asName)=0;
 
         virtual bool GetWindowMouseFocus()=0;
@@ -94,7 +96,7 @@ namespace hpl {
 		/*
 		 * Resize the window and/or toggle fullscreen at runtime without recreating the GL context!!
 		 */
-		virtual bool SetWindowSize(const cVector2l& avSize, bool abFullscreen)=0;
+		virtual bool SetWindowSize(const cVector2l& avSize, bool abFullscreen, bool abBorderless = false)=0;
 		
 		/**
 		 * Set if vsync should be active

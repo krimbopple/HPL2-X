@@ -265,11 +265,11 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
-	bool cGraphics::SetScreenSize(const cVector2l& avSize, bool abFullscreen)
+	bool cGraphics::SetScreenSize(const cVector2l& avSize, bool abFullscreen, bool abBorderless)
 	{
 		if(mbScreenIsSetup==false) return false;
 
-		if(mpLowLevelGraphics->SetWindowSize(avSize, abFullscreen)==false)
+		if(mpLowLevelGraphics->SetWindowSize(avSize, abFullscreen, abBorderless)==false)
 		{
 			return false;
 		}

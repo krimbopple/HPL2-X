@@ -11,6 +11,7 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 - Hardware cursor instead of software
 - Broadcast focus change while waiting for input focus
 - Scale popup message boxes with the screen size so confirmations aren't tiny on widescreen
+- Borderless (fullscreen desktop) window support
 
 #### Changed
 - Retargeted Visual Studio solution to v143 toolset (VS 2022)
@@ -31,9 +32,13 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 - Hardware cursor instead of software
 - Anti-Aliasing (MSAA) option in graphics settings (Off/2x/4x/8x)
 - Scale menu popup windows with screen height so they stay proportional on widescreen
+- Field of View option to help with motion sickness
+- Quick save / load is now an option, disabled by default (F4/F5)
+- Window Mode option (Windowed / Fullscreen / Borderless)
 
 #### Changed
 - Fix UI stretching on ultrawide by scaling by aspect ratio instead of difference
+- Quick save / load no longer requires the AllowQuickSave flag
 
 #### Removed
 

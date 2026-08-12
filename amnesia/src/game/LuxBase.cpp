@@ -1114,6 +1114,12 @@ bool cLuxBase::InitEngine()
 	vars.mGraphics.mvScreenSize =  mpConfigHandler->mvScreenSize;
 	vars.mGraphics.mlDisplay = mpConfigHandler->mlDisplay;
 	vars.mGraphics.mbFullscreen =  mpConfigHandler->mbFullscreen;
+
+	if(mpConfigHandler->mlWindowMode == 2)
+	{
+		vars.mGraphics.mbFullscreen = true;
+		vars.mGraphics.mvScreenSize = cVector2l(0,0);
+	}
 	vars.mGraphics.mlMultisampling = mpConfigHandler->mlMultisampling;
 	vars.mGraphics.msWindowCaption = msGameName + " Loading...";
 

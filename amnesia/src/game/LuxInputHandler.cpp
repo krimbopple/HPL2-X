@@ -363,6 +363,7 @@ void cLuxInputHandler::LoadUserConfig()
 {
 	mbInvertMouse = gpBase->mpUserConfig->GetBool("Input", "InvertMouse", false);
 	mbSmoothMouse = gpBase->mpUserConfig->GetBool("Input", "SmoothMouse", true);
+	SetRawMouseInput(gpBase->mpUserConfig->GetBool("Input", "RawMouseInput", true));
 
 	mfMouseSensitivity = gpBase->mpUserConfig->GetFloat("Input", "MouseSensitivity", 1.0f);
 
@@ -429,6 +430,7 @@ void cLuxInputHandler::SaveUserConfig()
 {
 	gpBase->mpUserConfig->SetBool("Input", "InvertMouse", mbInvertMouse);
 	gpBase->mpUserConfig->SetBool("Input", "SmoothMouse", mbSmoothMouse);
+	gpBase->mpUserConfig->SetBool("Input", "RawMouseInput", mbRawMouseInput);
 
 	gpBase->mpUserConfig->SetFloat("Input", "MouseSensitivity", mfMouseSensitivity);
 
@@ -553,6 +555,15 @@ void cLuxInputHandler::ChangeState(eLuxInputState aState)
 	mlstSmoothMousePos.clear();	//Every state needs new smoothing!
 
 	mvLastAbsMousePos = mpInput->GetMouse()->GetAbsPosition();
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxInputHandler::SetRawMouseInput(bool abX)
+{
+	mbRawMouseInput = abX;
+	if(mpGraphics)
+		mpGraphics->GetLowLevel()->SetRawMouseInput(abX);
 }
 
 //-----------------------------------------------------------------------

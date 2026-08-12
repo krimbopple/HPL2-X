@@ -79,6 +79,11 @@ void cLuxConfigHandler::LoadMainConfig()
 	mvScreenSize.y =	gpBase->mpMainConfig->GetInt("Screen","Height", 600);
     mlDisplay =			gpBase->mpMainConfig->GetInt("Screen","Display", 0);
 	mbFullscreen =		gpBase->mpMainConfig->GetBool("Screen","FullScreen", false);
+
+	int lWindowMode = gpBase->mpMainConfig->GetInt("Screen","WindowMode", mbFullscreen ? 1 : 0);
+	if(lWindowMode==2 && mbFullscreen==false) lWindowMode = 0; // launcher windowed
+	if(lWindowMode==0 && mbFullscreen==true)  lWindowMode = 1; // launcher fullscreen
+	mlWindowMode = lWindowMode;
 	mlMultisampling =	gpBase->mpMainConfig->GetInt("Graphics","MSAA", 0);
 	mbVSync =			gpBase->mpMainConfig->GetBool("Screen","Vsync", false);
 	mbAdaptiveVSync =	gpBase->mpMainConfig->GetBool("Screen","AdaptiveVsync", false);
@@ -161,6 +166,7 @@ void cLuxConfigHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetInt("Screen","Width", mvScreenSize.x);
 	gpBase->mpMainConfig->SetInt("Screen","Height", mvScreenSize.y);
 	gpBase->mpMainConfig->SetBool("Screen","FullScreen", mbFullscreen);
+	gpBase->mpMainConfig->SetInt("Screen","WindowMode", mlWindowMode);
 	gpBase->mpMainConfig->SetInt("Graphics","MSAA", mlMultisampling);
 	gpBase->mpMainConfig->SetBool("Screen","Vsync", mbVSync);
 

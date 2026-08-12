@@ -429,6 +429,8 @@ void cLuxPlayer::LoadUserConfig()
 	mbShowCrossHair = gpBase->mpUserConfig->GetBool("Game", "ShowCrossHair", true);
 	mFocusIconStyle = StringToFocusIconStyle(gpBase->mpUserConfig->GetString("Game", "FocusIconStyle", "Default"));
 
+	SetFOV(gpBase->mpUserConfig->GetFloat("Game", "FOV", cMath::ToDeg(mfFOV)));
+
 	RunHelperLuxMessage(eLuxUpdateableMessage_LoadUserConfig,0);
 }
 
@@ -436,8 +438,17 @@ void cLuxPlayer::SaveUserConfig()
 {
 	gpBase->mpUserConfig->SetBool("Game", "ShowCrossHair", mbShowCrossHair);
 	gpBase->mpUserConfig->SetString("Game", "FocusIconStyle", FocusIconStyleToString(mFocusIconStyle));
+	gpBase->mpUserConfig->SetFloat("Game", "FOV", cMath::ToDeg(mfFOV));
 
 	RunHelperLuxMessage(eLuxUpdateableMessage_SaveUserConfig,0);
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxPlayer::SetFOV(float afDegrees)
+{
+	mfFOV = cMath::ToRad(afDegrees);
+	if(mpCamera) mpCamera->SetFOV(mfFOV*mfFOVMul);
 }
 
 //-----------------------------------------------------------------------

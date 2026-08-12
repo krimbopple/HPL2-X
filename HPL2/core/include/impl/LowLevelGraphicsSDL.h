@@ -119,6 +119,8 @@ namespace hpl {
 
         void SetRelativeMouse(bool abX);
 
+        void SetRawMouseInput(bool abX);
+
         void SetWindowCaption(const tString &asName);
 
         bool GetWindowMouseFocus();
@@ -129,7 +131,7 @@ namespace hpl {
 
 		bool GetFullscreenModeActive() { return mbFullscreen; }
 
-		bool SetWindowSize(const cVector2l& avSize, bool abFullscreen);
+		bool SetWindowSize(const cVector2l& avSize, bool abFullscreen, bool abBorderless = false);
 
 		void SetVsyncActive(bool abX, bool abAdaptive);
 

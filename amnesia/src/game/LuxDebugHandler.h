@@ -69,6 +69,7 @@ public:
 	bool GetScriptDebugOn(){ return mbScriptDebugOn;}
 	bool GetDisableFlashBacks(){ return mbDisableFlashBacks;}
 	bool GetAllowQuickSave(){ return mbAllowQuickSave;}
+	void SetAllowQuickSave(bool abX){ mbAllowQuickSave = abX; }
 
 	void SetFastForward(bool abX);
 	bool GetFastForward(){ return mbFastForward;}
