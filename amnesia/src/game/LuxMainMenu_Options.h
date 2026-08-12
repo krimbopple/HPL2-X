@@ -263,6 +263,8 @@ private:
 
 	bool mbSimRateWarningPending;
 
+	bool mbQuickSaveWarningPending;
+
 	bool mbKeyConfigOpen;
 
 	tVideoModeVec mvScreenSizes;
@@ -324,6 +326,12 @@ private:
 
 	bool SimulationRateWarningCallback(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(SimulationRateWarningCallback);
+
+	bool QuickSave_OnChange(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(QuickSave_OnChange);
+
+	bool QuickSaveWarningCallback(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(QuickSaveWarningCallback);
 };
 
 //----------------------------------------------

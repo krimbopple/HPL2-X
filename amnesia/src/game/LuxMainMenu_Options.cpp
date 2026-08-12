@@ -193,6 +193,8 @@ cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSki
 
 	mbSimRateWarningPending = false;
 
+	mbQuickSaveWarningPending = false;
+
 	mbKeyConfigOpen = false;
 }
 
@@ -402,6 +404,7 @@ void cLuxMainMenu_Options::AddGameOptions(cWidgetTab* apTab)
 	// Quick Save/Load Checkbox
 	mpChBQuickSave = mpGuiSet->CreateWidgetCheckBox(vPos, 0, GetOptionsMenuString("QuickSave", _W("Quick save / load")), apTab);
 	SetUpInput(NULL, mpChBQuickSave, false, GetOptionsMenuString("QuickSaveTip", _W("Allow quick saving and loading at any time with F4 and F5.")));
+	mpChBQuickSave->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(QuickSave_OnChange));
 
 	vPos.y += mpChBQuickSave->GetSize().y + 15*fScale;
 
@@ -2239,6 +2242,21 @@ bool cLuxMainMenu_Options::Window_OnUpdate(iWidget* apWidget, const cGuiMessageD
 	}
 
 	///////////////////////////////////////////////////
+	if(mbQuickSaveWarningPending)
+	{
+		mbQuickSaveWarningPending = false;
+		if(mpGuiSet->PopUpIsActive()==false)
+		{
+			cGuiPopUpMessageBox* pPopUp = mpGuiSet->CreatePopUpMessageBox(
+					GetOptionsMenuString("QuickSaveWarningLabel", _W("Quick Save / Load")),
+					GetOptionsMenuString("QuickSaveWarningMessage", _W("This may impact the intended experience of the game. Quicksaving lets you bypass the game's checkpoint design.")),
+					kTranslate("MainMenu","OK"), _W(""),
+					this, kGuiCallback(QuickSaveWarningCallback));
+			pPopUp->GetGuiSet()->SetDrawFocus(true);
+		}
+	}
+
+	///////////////////////////////////////////////////
 	// If there is a popup active, dont update tips
 	if(mpGuiSet->PopUpIsActive())
 		return true;
@@ -2592,6 +2610,29 @@ bool cLuxMainMenu_Options::SimulationRateWarningCallback(iWidget* apWidget, cons
 	return true;
 }
 kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, SimulationRateWarningCallback);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::QuickSave_OnChange(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	if(mbSettingInitialValues) return true;
+
+	if(mpChBQuickSave->IsChecked())
+	{
+		mbQuickSaveWarningPending = true;
+	}
+
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, QuickSave_OnChange);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::QuickSaveWarningCallback(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, QuickSaveWarningCallback);
 
 //-----------------------------------------------------------------------
 

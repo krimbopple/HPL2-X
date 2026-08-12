@@ -125,7 +125,7 @@ void cLuxDebugHandler::LoadUserConfig()
 
 	mbReloadFromCurrentPosition = gpBase->mpUserConfig->GetBool("Debug", "ReloadFromCurrentPosition", true);
 
-	mbAllowQuickSave = gpBase->mpUserConfig->GetBool("Debug", "AllowQuickSave", true);
+	mbAllowQuickSave = gpBase->mpUserConfig->GetBool("Debug", "AllowQuickSave", false);
 
 
 	if(gpBase->mbPTestActivated)
