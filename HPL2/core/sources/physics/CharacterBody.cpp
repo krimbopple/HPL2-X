@@ -1618,7 +1618,15 @@ namespace hpl {
 	void iCharacterBody::CheckStepClimbing(const cVector3f &avPosAdd, float afTimeStep)
 	{
 		if(mfCheckStepClimbCount > 0) return;
-		if(avPosAdd.SqrLength() < kEpsilonf) return;
+		
+		//Movement is basically speed * time step, so test the speed itself instead of the raw movement,
+		//otherwise at high sim rates this check stops firing for walking
+		float fMoveSpeed = avPosAdd.Length() / afTimeStep;
+		if(fMoveSpeed < 0.6f)
+		{
+			mfCheckStepClimbCount = mfCheckStepClimbInterval;
+			return;
+		}
 		
 		//Send a ray in front of the player.
 		float fRadius = mpCurrentShape->GetRadius();
@@ -1631,6 +1639,7 @@ namespace hpl {
 		cVector3f vStepAdd[3];
 		cVector3f vStart[3];
 		cVector3f vEnd[3];
+		cVector3f vNormal[3];
 		bool bCollided[3];
 		float fMinDist[3];
 		int lNumRays= mbAccurateClimbing ? 3 : 1;
@@ -1656,7 +1665,7 @@ namespace hpl {
 			vStart[i] = mvPosition+ vStepAdd[i];//mvPosition + cVector3f(0,mvSize.y/2,0)+ vStepAdd[i];
 			vEnd[i] = vStart[i] - cVector3f(0,mvSize.y/2.0f,0);//cVector3f(0,mvSize.y,0);
 
-			bCollided[i] = CheckRayIntersection(vStart[i],vEnd[i],&fMinDist[i], NULL);
+			bCollided[i] = CheckRayIntersection(vStart[i],vEnd[i],&fMinDist[i], &vNormal[i]);
 		}
 		
 
@@ -1671,7 +1680,10 @@ namespace hpl {
 			
 			float fHeight = mvSize.y/2.0f - fMinDist[i];
 
-			if(fHeight <= fMaxHeight && fHeight>0.025f)
+			//Only climb real steps. A slope is not a step...
+			if(vNormal[i].y < 0.95f) continue;
+
+			if(fHeight <= fMaxHeight && fHeight>0.01f)
 			{
 				//Check if there is any collision on the new pos
 				cVector3f vStepPos = mvPosition + cVector3f(0,fHeight+mfClimbHeightAdd,0)+ (vMoveDir*fForwadAdd*mfClimbForwardMul);
@@ -1679,7 +1691,9 @@ namespace hpl {
 				if(CheckCharacterFits(vStepPos))
 				{
 					//Climb the stair.
-					mvPosition.y += mfStepClimbSpeed * afTimeStep;
+					float fClimb = mfStepClimbSpeed * afTimeStep;
+					if(fHeight < fClimb) fClimb = fHeight;
+					mvPosition.y += fClimb;
 					mbClimbing = true;
 					break;
 				}
