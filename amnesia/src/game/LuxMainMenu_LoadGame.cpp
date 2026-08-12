@@ -197,7 +197,13 @@ void cLuxMainMenu_LoadGame::LoadGame(int alIdx)
 
 	gpBase->mpProgressLogHandler->CreateAndResetLogFile();
 
-	gpBase->mpSaveHandler->LoadGameFromFile(gpBase->msProfileSavePath+mvSavedGameFileNames[alIdx]);
+	if(gpBase->mpSaveHandler->LoadGameFromFile(gpBase->msProfileSavePath+mvSavedGameFileNames[alIdx])==false)
+	{
+		//Return to the main menu instead of crashing
+		gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
+		gpBase->mpMainMenu->OnLeaveContainer("");
+		gpBase->mpMainMenu->OnEnterContainer("");
+	}
 }
 
 //-----------------------------------------------------------------------
