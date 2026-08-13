@@ -2325,7 +2325,7 @@ int hplMain(const tString &asCommandline)
 	vars.mGraphics.msWindowCaption = "ModelView - Initalizing...";
 	//vars.mGraphics.mvWindowPosition = cVector2l(0,0);
 	gpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
-	gpEngine->SetLimitFPS(false);
+	gpEngine->SetMaxFPS(0);
 	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false);
 	gpEngine->SetWaitIfAppOutOfFocus(true);
 	

@@ -177,6 +177,10 @@ cLuxMainMenu_Options::cLuxMainMenu_Options(cGuiSet *apGuiSet, cGuiSkin *apGuiSki
 	mfFOVStep = 1.0f;
 	mfFOVMax = 120.0f;
 
+	mfFPSLimitMin = 30.0f;
+	mfFPSLimitStep = 1.0f;
+	mfFPSLimitMax = 250.0f;
+
 #ifdef USE_GAMEPAD
 	mfGamepadLookSensitivityMin = 0.5f;
 	mfGamepadLookSensitivityStep = 0.05f;
@@ -565,7 +569,7 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	cWidgetGroup *pGroup = mpGuiSet->CreateWidgetGroup(vPos,0, kTranslate("OptionsMenu", "Screen"), apDummy);
 	{
 		float fBorderSize = 15;
-		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,135*fScale));
+		pGroup->SetSize(cVector2f(apDummy->GetParent()->GetSize().x-fBorderSize-fBorderSize,160*fScale));
 		cVector3f vPosInGroup = cVector3f(fBorderSize, fBorderSize, 0.1f);
 
 		/////////////////////////////////
@@ -599,13 +603,21 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 		mpCBWindowMode->AddItem(GetOptionsMenuString("WindowModeFullscreen", _W("Fullscreen")));
 		mpCBWindowMode->AddItem(GetOptionsMenuString("WindowModeBorderless", _W("Borderless")));
 
-		cVector3f vVsyncPos = vPosInGroup + cVector3f(0, 2*fScale + pLabel->GetSize().y + 5*fScale + mpCBWindowMode->GetSize().y + 10*fScale, 0);
+		cVector3f vFPSPos = vPosInGroup + cVector3f(0, 2*fScale + pLabel->GetSize().y + 5*fScale + mpCBWindowMode->GetSize().y + 10*fScale, 0);
+
+		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vFPSPos, 0, GetOptionsMenuString("UncapFPS", _W("Uncapped FPS")), pGroup);
+		SetUpInput(NULL, mpChBUncapFPS, false, GetOptionsMenuString("UncapFPSTip", _W("Disable the frame rate limit and render as fast as possible.")));
+		mpChBUncapFPS->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(UncapFPS_OnChange));
+
+		cVector3f vMaxFPSLabelPos = vFPSPos + cVector3f(0, mpChBUncapFPS->GetSize().y + 10*fScale, 0);
+		pLabel = mpGuiSet->CreateWidgetLabel(vMaxFPSLabelPos, -1, GetOptionsMenuString("MaxFPS", _W("Max FPS")), pGroup);
+		mpSFPSLimit = mpGuiSet->CreateWidgetSlider(eWidgetSliderOrientation_Horizontal, pLabel->GetLocalPosition() + cVector3f(0,pLabel->GetSize().y+5*fScale,0), cVector2f(110*fScale,20*fScale), 0, pGroup);
+		SetUpInput(pLabel, mpSFPSLimit, false, GetOptionsMenuString("MaxFPSTip", _W("Upper limit on the number of frames rendered per second.")));
+		SetUpSlider(mpSFPSLimit, mfFPSLimitMin, mfFPSLimitMax, mfFPSLimitStep, kGuiCallback(FPSLimitSlider_OnMove), &mpLFPSLimit);
+
+		cVector3f vVsyncPos = mpSFPSLimit->GetLocalPosition() + cVector3f(0, mpSFPSLimit->GetSize().y + 10*fScale, 0);
 		mpChBVSync = mpGuiSet->CreateWidgetCheckBox(vVsyncPos, 0, kTranslate("OptionsMenu","VSync"), pGroup);
 		SetUpInput(NULL, mpChBVSync, false, kTranslate("OptionsMenu","VSyncTip"));
-
-		mpChBUncapFPS = mpGuiSet->CreateWidgetCheckBox(vVsyncPos + cVector3f(0,mpChBVSync->GetSize().y+10*fScale,0), 0, GetOptionsMenuString("UncapFPS", _W("Uncap FPS")), pGroup);
-		SetUpInput(NULL, mpChBUncapFPS, false, GetOptionsMenuString("UncapFPSTip", _W("Render as fast as possible instead of locking the game to 60 FPS.")));
-
 
 //		mpChBAdaptiveVSync = mpGuiSet->CreateWidgetCheckBox(vPosInGroup + cVector3f(mpChBVSync->GetSize().x+10,mpChBFullScreen->GetSize().y+10,0), 0, kTranslate("OptionsMenu","AdaptiveVSync"), pGroup);
 //		SetUpInput(NULL, mpChBAdaptiveVSync, false, kTranslate("OptionsMenu","AdaptiveVSyncTip"));
@@ -680,22 +692,26 @@ void cLuxMainMenu_Options::AddBasicGfxOptions(cWidgetDummy* apDummy)
 	mpCBSimulationRate->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 
 	mpCBWindowMode->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
-	mpCBWindowMode->SetFocusNavigation(eUIArrow_Down, mpChBVSync);
+	mpCBWindowMode->SetFocusNavigation(eUIArrow_Down, mpChBUncapFPS);
+
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Left, mpCBSimulationRate);
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Up, mpCBWindowMode);
+	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Down, mpSFPSLimit);
+
+	mpSFPSLimit->SetFocusNavigation(eUIArrow_Left, mpCBSimulationRate);
+	mpSFPSLimit->SetFocusNavigation(eUIArrow_Up, mpChBUncapFPS);
+	mpSFPSLimit->SetFocusNavigation(eUIArrow_Down, mpChBVSync);
 
 	mpChBVSync->SetFocusNavigation(eUIArrow_Left, mpCBResolution);
 //	mpChBVSync->SetFocusNavigation(eUIArrow_Right, mpChBAdaptiveVSync);
-	mpChBVSync->SetFocusNavigation(eUIArrow_Up, mpCBWindowMode);
-	mpChBVSync->SetFocusNavigation(eUIArrow_Down, mpChBUncapFPS);
-
-	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Left, mpCBSimulationRate);
-	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Up, mpChBVSync);
-	mpChBUncapFPS->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
+	mpChBVSync->SetFocusNavigation(eUIArrow_Up, mpSFPSLimit);
+	mpChBVSync->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 	
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Left, mpChBVSync);
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Up, mpChBFullScreen);
 //	mpChBAdaptiveVSync->SetFocusNavigation(eUIArrow_Down, mpCBTextureSizeLevel);
 
-	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Up, mpCBSimulationRate);
+	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Up, mpChBVSync);
 	mpCBTextureSizeLevel->SetFocusNavigation(eUIArrow_Down, mpSGamma);
 
 	mpSGamma->SetFocusNavigation(eUIArrow_Up, mpCBTextureSizeLevel);
@@ -1365,9 +1381,12 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		/////////////////////////
 		// Window mode & vsync
 		mpCBWindowMode->SetSelectedItem(aObj.GetVarInt("WindowMode"), false, false);
+		mpChBUncapFPS->SetChecked(aObj.GetVarBool("UncapFPS"), false);
+		SetSliderValue(mpSFPSLimit, (float)aObj.GetVarInt("MaxFPS", 60), false, mfFPSLimitMin, mfFPSLimitMax);
+		SetFPSLimitLabelString((float)aObj.GetVarInt("MaxFPS", 60));
+		mpSFPSLimit->SetEnabled(mpChBUncapFPS->IsChecked() == false);
 		mpChBVSync->SetChecked(aObj.GetVarBool("VSync"), false);
 //		mpChBAdaptiveVSync->SetChecked(aObj.GetVarBool("AdaptiveVsync"), false);
-		mpChBUncapFPS->SetChecked(aObj.GetVarBool("UncapFPS"), false);
 		mpCBSimulationRate->SetSelectedItem(GetIndexFromSimulationRate(aObj.GetVarInt("SimulationRate", 60)), false, false);
 
 		/////////////////////////
@@ -1668,10 +1687,11 @@ void cLuxMainMenu_Options::ApplyChanges()
 		pCfgHdr->mbVSync = mpChBVSync->IsChecked();
 //		pCfgHdr->mbAdaptiveVSync = mpChBAdaptiveVSync->IsChecked();
 		pCfgHdr->mbUncapFPS = mpChBUncapFPS->IsChecked();
+		pCfgHdr->mlMaxFPS = GetMaxFPS();
 		pCfgHdr->mlSimulationRate = GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem());
 		pCfgHdr->mlMultisampling = GetMSAAFromIndex(mpCBMSAA->GetSelectedItem());
 		pGfx->GetLowLevel()->SetVsyncActive(pCfgHdr->mbVSync, pCfgHdr->mbAdaptiveVSync);
-		gpBase->mpEngine->SetLimitFPS(pCfgHdr->mbUncapFPS == false);
+		gpBase->mpEngine->SetMaxFPS(pCfgHdr->mbUncapFPS ? 0 : pCfgHdr->mlMaxFPS);
 		gpBase->mpEngine->SetUpdatesPerSec(pCfgHdr->mlSimulationRate);
 		pGfx->GetLowLevel()->SetGammaCorrection(GetGamma());
 
@@ -1820,6 +1840,13 @@ void cLuxMainMenu_Options::SetSensitivityLabelString(float afX)
 void cLuxMainMenu_Options::SetGameFOVLabelString(float afX)
 {
 	SetSliderLabelString(mpLGameFOV, afX, mfFOVMin, mfFOVMax, _W(""), _W(""));
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxMainMenu_Options::SetFPSLimitLabelString(float afX)
+{
+	SetSliderLabelString(mpLFPSLimit, afX, mfFPSLimitMin, mfFPSLimitMax, _W(""), _W(""));
 }
 
 //-----------------------------------------------------------------------
@@ -2030,6 +2057,7 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("VSync", gpBase->mpConfigHandler->mbVSync);
 		aObj.AddVarBool("AdaptiveVsync", gpBase->mpConfigHandler->mbAdaptiveVSync);
 		aObj.AddVarBool("UncapFPS", gpBase->mpConfigHandler->mbUncapFPS);
+		aObj.AddVarInt("MaxFPS", gpBase->mpConfigHandler->mlMaxFPS);
 		aObj.AddVarInt("SimulationRate", gpBase->mpConfigHandler->mlSimulationRate);
 		
 		/////////////////////////
@@ -2138,6 +2166,7 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarInt("WindowMode",	mpCBWindowMode->GetSelectedItem());
 		aObj.AddVarBool("VSync",		mpChBVSync->IsChecked());
 		aObj.AddVarBool("UncapFPS",		mpChBUncapFPS->IsChecked());
+		aObj.AddVarInt("MaxFPS",		GetMaxFPS());
 		aObj.AddVarInt("SimulationRate", GetSimulationRateFromIndex(mpCBSimulationRate->GetSelectedItem()));
 		
 		/////////////////////////
@@ -2407,6 +2436,30 @@ bool cLuxMainMenu_Options::GameFOVSlider_OnMove(iWidget* apWidget, const cGuiMes
 	return true;
 }
 kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, GameFOVSlider_OnMove);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::FPSLimitSlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	if(mbSettingInitialValues) return true;
+
+	SetFPSLimitLabelString((float)GetMaxFPS());
+
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, FPSLimitSlider_OnMove);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_Options::UncapFPS_OnChange(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	if(mbSettingInitialValues) return true;
+
+	mpSFPSLimit->SetEnabled(mpChBUncapFPS->IsChecked() == false);
+
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_Options, UncapFPS_OnChange);
 
 //-----------------------------------------------------------------------
 

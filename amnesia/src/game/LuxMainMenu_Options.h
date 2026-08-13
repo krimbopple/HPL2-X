@@ -74,6 +74,7 @@ private:
 	float GetGamma() { return GetSliderValue(mpSGamma, mfGammaMin, mfGammaMax); }
 	float GetSensitivity() { return GetSliderValue(mpSMouseSensitivity, mfMouseSensitivityMin, mfMouseSensitivityMax); }
 	float GetGameFOV() { return GetSliderValue(mpSGameFOV, mfFOVMin, mfFOVMax); }
+	int GetMaxFPS() { return (int)GetSliderValue(mpSFPSLimit, mfFPSLimitMin, mfFPSLimitMax); }
 #ifdef USE_GAMEPAD
 	float GetGamepadLookSensitivity() { return GetSliderValue(mpSGamepadLookSensitivity, mfGamepadLookSensitivityMin, mfGamepadLookSensitivityMax); }
 #endif
@@ -82,6 +83,7 @@ private:
 	void SetGammaLabelString(float afX);
 	void SetSensitivityLabelString(float afX);
 	void SetGameFOVLabelString(float afX);
+	void SetFPSLimitLabelString(float afX);
 	void SetGamepadLookSensitivityLabelString(float afX);
 	void SetVolumeLabelString(float afX);
 
@@ -160,6 +162,8 @@ private:
 	cWidgetCheckBox *mpChBVSync;
 //	cWidgetCheckBox *mpChBAdaptiveVSync;
 	cWidgetCheckBox *mpChBUncapFPS;
+	cWidgetLabel	*mpLFPSLimit;
+	cWidgetSlider	*mpSFPSLimit;
 	cWidgetComboBox *mpCBSimulationRate;
 
 	cWidgetComboBox *mpCBTextureSizeLevel;
@@ -236,6 +240,10 @@ private:
 	float mfFOVMin;
 	float mfFOVMax;
 	float mfFOVStep;
+
+	float mfFPSLimitMin;
+	float mfFPSLimitMax;
+	float mfFPSLimitStep;
 	
 #ifdef USE_GAMEPAD
 	float mfGamepadLookSensitivityMin;
@@ -294,6 +302,12 @@ private:
 
 	bool GameFOVSlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(GameFOVSlider_OnMove);
+
+	bool FPSLimitSlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(FPSLimitSlider_OnMove);
+
+	bool UncapFPS_OnChange(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(UncapFPS_OnChange);
 
 #ifdef USE_GAMEPAD
 	bool GamepadLookSensitivitySlider_OnMove(iWidget* apWidget, const cGuiMessageData& aData);

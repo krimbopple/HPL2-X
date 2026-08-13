@@ -89,6 +89,9 @@ void cLuxConfigHandler::LoadMainConfig()
 	mbAdaptiveVSync =	gpBase->mpMainConfig->GetBool("Screen","AdaptiveVsync", false);
 
 	mbUncapFPS = gpBase->mpMainConfig->GetBool("Engine","LimitFPS", false) == false;
+	mlMaxFPS = gpBase->mpMainConfig->GetInt("Engine","MaxFPS", 60);
+	if(mlMaxFPS < 30) mlMaxFPS = 30;
+	if(mlMaxFPS > 250) mlMaxFPS = 250;
 	mlSimulationRate = gpBase->mpMainConfig->GetInt("Engine","SimulationRate", 60);
 	if(mlSimulationRate < 60) mlSimulationRate = 60;
 	mbSleepWhenOutOfFocus = gpBase->mpMainConfig->GetBool("Engine","SleepWhenOutOfFocus", true);
@@ -225,6 +228,7 @@ void cLuxConfigHandler::SaveMainConfig()
 	/////////////////////
 	// Engine properties
 	gpBase->mpMainConfig->SetBool("Engine","LimitFPS", mbUncapFPS==false);
+	gpBase->mpMainConfig->SetInt("Engine","MaxFPS", mlMaxFPS);
 	gpBase->mpMainConfig->SetInt("Engine","SimulationRate", mlSimulationRate);
 	gpBase->mpMainConfig->SetBool("Engine","SleepWhenOutOfFocus", mbSleepWhenOutOfFocus);
 }

@@ -748,7 +748,7 @@ cEngine* iEditorBase::Init(cEngine* apEngine, const char* asName, const char* as
 	/////////////////////////
 	//Set up engine
 	
-	mpEngine->SetLimitFPS(false);
+	mpEngine->SetMaxFPS(0);
 	mpEngine->SetWaitIfAppOutOfFocus(true);
 
 	mpViewport = mpEngine->GetScene()->CreateViewport(NULL,NULL);

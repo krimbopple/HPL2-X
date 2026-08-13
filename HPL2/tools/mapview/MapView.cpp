@@ -2049,7 +2049,7 @@ int hplMain(const tString &asCommandline)
 	vars.mGraphics.mvScreenSize.y = gpConfig->GetInt("Screen","Height",768);
 	vars.mGraphics.mbFullscreen = gpConfig->GetBool("Screen","FullScreen", false);
 	gpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
-	gpEngine->SetLimitFPS(false);
+	gpEngine->SetMaxFPS(0);
 	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false);
 	gpEngine->SetWaitIfAppOutOfFocus(true);
 

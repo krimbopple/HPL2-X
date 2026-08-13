@@ -711,7 +711,7 @@ int hplMain(const tString &asCommandline)
 	vars.mGraphics.mbFullscreen = false;
 	vars.mGraphics.msWindowCaption = "ParticleView - Initalizing...";
 	gpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
-	gpEngine->SetLimitFPS(false);
+	gpEngine->SetMaxFPS(0);
 	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false);
 	gpEngine->SetWaitIfAppOutOfFocus(true);
 	

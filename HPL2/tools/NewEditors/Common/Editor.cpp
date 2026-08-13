@@ -156,7 +156,7 @@ cEngine* iEditor::Init(cEngine* apEngine, bool abDestroyEngineOnExit)
 
 	/////////////////////////
 	//Set up engine
-	mpEngine->SetLimitFPS(false);
+	mpEngine->SetMaxFPS(0);
 	mpEngine->SetWaitIfAppOutOfFocus(true);
 
 	mpEngine->GetPhysics()->LoadSurfaceData("materials.cfg");

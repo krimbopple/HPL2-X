@@ -149,8 +149,8 @@ namespace hpl {
 
 		double GetGameTime(){ return mfGameTime;}
 
-		void SetLimitFPS(bool abX){ mbLimitFPS = abX;}
-		bool GetLimitFPS(){ return mbLimitFPS;}
+		void SetMaxFPS(int alMaxFPS){ mlMaxFPS = alMaxFPS;}
+		int GetMaxFPS(){ return mlMaxFPS;}
 
 		void SetWaitIfAppOutOfFocus(bool abX){ mbWaitIfAppOutOfFocus =abX;}
 		bool GetWaitIfAppOutOfFocus(){ return mbWaitIfAppOutOfFocus;}
@@ -207,8 +207,10 @@ namespace hpl {
 		cFPSCounter* mpFPSCounter;
 		
 		iTimer *mpFrameTimer;
-		
-		bool mbLimitFPS;
+
+		iTimer *mpFrameLimiter;
+
+		int mlMaxFPS;
 
 		tScriptVarMap m_mapLocalVars;
 		tScriptVarMap m_mapGlobalVars;

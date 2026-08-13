@@ -350,10 +350,11 @@ namespace hpl {
 
 		mfGameTime =0;
 
-		mbLimitFPS = true;
+		mlMaxFPS = 0;
 
 		mpFPSCounter = hplNew( cFPSCounter,(mpSystem->GetLowLevel()) );
 		mpFrameTimer = cPlatform::CreateTimer();
+		mpFrameLimiter = cPlatform::CreateTimer();
 		Log("--------------------------------------------------------\n\n");
 
 		Log("User Initialization\n");
@@ -369,6 +370,7 @@ namespace hpl {
 		hplDelete(mpLogicTimer);
 		hplDelete(mpFPSCounter);
 		hplDelete(mpFrameTimer);
+		hplDelete(mpFrameLimiter);
 		hplDelete(mpMutex);
 		
 		hplDelete(mpUpdater);
@@ -420,6 +422,7 @@ namespace hpl {
 
 		mfFrameTime = 0;
 		mpFrameTimer->Start();
+		mpFrameLimiter->Start();
 		
 		bool bIsUpdated = true;
 		bool bBufferSwap = false;
@@ -522,7 +525,25 @@ namespace hpl {
 
 			////////////////////////////////////
 			// Render frame
-			if(mbLimitFPS==false || bIsUpdated)
+			bool bRenderFrame = (mlMaxFPS == 0);
+			if(bRenderFrame == false)
+			{
+				double fTargetFrameTime = 1.0 / (double)mlMaxFPS;
+				double fElapsed = mpFrameLimiter->GetTimeInSec();
+				if(fElapsed < fTargetFrameTime)
+				{
+					double fRemaining = fTargetFrameTime - fElapsed;
+					double fSleepMs = (fRemaining - 0.002) * 1000.0;
+					if(fSleepMs > 0.0)
+					{
+						cPlatform::Sleep((unsigned long)fSleepMs);
+					}
+					while(mpFrameLimiter->GetTimeInSec() < fTargetFrameTime) {}
+				}
+				bRenderFrame = true;
+			}
+
+			if(bRenderFrame)
 			{
 				///////////////////////////////////////
            		//Get the the from the last frame.
@@ -552,6 +573,7 @@ namespace hpl {
 				fNumOfTimes++;
 				bIsUpdated = false;
 				bBufferSwap = true;
+				mpFrameLimiter->Start();
 			}
 
 			//if(GetGameIsDone()) Log("4\n");
