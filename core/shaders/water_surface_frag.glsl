@@ -3,7 +3,7 @@
 //
 // Shades the surface of a water
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -11,12 +11,12 @@
 
 ////////////////////////////////
 // Variying input
-varying vec3 gvVertexPos;
+in vec3 gvVertexPos;
 
 @ifdef UseReflection
-	varying vec3 gvNormal;
-	varying vec3 gvTangent;
-	varying vec3 gvBinormal;
+	in vec3 gvNormal;
+	in vec3 gvTangent;
+	in vec3 gvBinormal;
 @endif
 
 
@@ -90,14 +90,14 @@ void main()
 	///////////////////////////////
 	//Get the normals and combine into final normal
 	// (No need for full unpack since there is a normalize later)
-	vec3 vNormal1 = texture2D(aNormalMap, vUv1).xyz-0.5;
-	vec3 vNormal2 = texture2D(aNormalMap, vUv2).xyz-0.5;
+	vec3 vNormal1 = texture(aNormalMap, vUv1).xyz-0.5;
+	vec3 vNormal2 = texture(aNormalMap, vUv2).xyz-0.5;
 	
 	vec3 vFinalNormal = normalize(vNormal1*0.7 + vNormal2*0.3);
 		
 	///////////////////////////////
 	//Get the diffuse color
-	vec4 vSurfaceColor = texture2D(aDiffuseMap, vUv1);
+	vec4 vSurfaceColor = texture(aDiffuseMap, vUv1);
 	
 	
 	///////////////////////////////
@@ -115,11 +115,11 @@ void main()
 		float fInvDist = min(1.0/gvVertexPos.z, 10.0);
 		vec2 vDistortedScreenPos = gl_FragCoord.xy + vFinalNormal.xy * afRefractionScale * fInvDist;
 		
-		vec4 vRefractionColor = texture2DRect(aRefractionMap, vDistortedScreenPos);
+		vec4 vRefractionColor = texture(aRefractionMap, vDistortedScreenPos);
 		
 		@ifdef UseRefractionEdgeCheck
 			if(vRefractionColor.w <0.5) 
-				vRefractionColor = texture2DRect(aRefractionMap, gl_FragCoord.xy);
+				vRefractionColor = texture(aRefractionMap, gl_FragCoord.xy);
 		@endif
 	@else
 		vec4 vRefractionColor = vec4(1);
@@ -152,11 +152,11 @@ void main()
 			vec3 vEnvUv = reflect(vEyeVec, vScreenNormal);
 			vEnvUv = (a_mtxInvViewRotation * vec4(vEnvUv,1)).xyz;
 					
-			vec4 vReflectionColor = textureCube(aEnvMap,vEnvUv);
+			vec4 vReflectionColor = texture(aEnvMap,vEnvUv);
 		//////////////////
 		//World reflection
 		@else
-			vec4 vReflectionColor = texture2DRect(aReflectionMap, vDistortedScreenPos * avReflectionMapSizeMul);
+			vec4 vReflectionColor = texture(aReflectionMap, vDistortedScreenPos * avReflectionMapSizeMul);
 		@endif
 		
 		

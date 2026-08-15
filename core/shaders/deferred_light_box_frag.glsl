@@ -3,7 +3,7 @@
 //
 // Fragment program to draw a light box. 
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 ////////////////////
@@ -23,10 +23,10 @@ uniform vec4 avLightColor;
 void main()
 {
 	vec2 vMapCoords = gl_FragCoord.xy;
-	vec4 vColorVal =  texture2DRect(aDiffuseMap, vMapCoords);
+	vec4 vColorVal =  texture(aDiffuseMap, vMapCoords);
 	
 	@ifdef UseSSAO
-		vColorVal *= texture2DRect(aSSAOMap, vMapCoords * 0.5);	//SSAO should be half the size of the screen.
+		vColorVal *= texture(aSSAOMap, vMapCoords * 0.5);	//SSAO should be half the size of the screen.
 	@endif
 	
 	//Multiply with light color and AO (w).

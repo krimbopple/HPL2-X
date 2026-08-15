@@ -1,4 +1,4 @@
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -21,7 +21,7 @@ void main()
 {
 	///////////////
 	// This is the core depth that we compare to
-	float fCoreDepth = texture2DRect(depthMap, gl_TexCoord[0].xy).x;
+	float fCoreDepth = texture(depthMap, gl_TexCoord[0].xy).x;
 	
 	
 	//Have a max limit on the length, or else there will be major slowdowns when many objects are upfront.
@@ -47,13 +47,13 @@ void main()
 		//Get the scatter coordinates (used to get the randomized postion for each sampling)
 		vec2 vScatterLookupCoord1 = vec2(vScreenScatterCoord.x, vScreenScatterCoord.y + fScatterDiskZ*4.0);
 					
-		vec4 vOffset1 = (texture2D(scatterDisk, vScatterLookupCoord1) *2.0 - 1.0)  * fScatterLength;
+		vec4 vOffset1 = (texture(scatterDisk, vScatterLookupCoord1) *2.0 - 1.0)  * fScatterLength;
 		
 		//Look up the depth at the random samples. Notice that x-z and y-w are each others opposites! (important for extra polation below!)
-		vec4 vDepth = vec4(	texture2DRect(depthMap, gl_TexCoord[0].xy + vOffset1.xy).x,
-					texture2DRect(depthMap, gl_TexCoord[0].xy + vOffset1.zw).x,
-					texture2DRect(depthMap, gl_TexCoord[0].xy - vOffset1.xy).x,
-					texture2DRect(depthMap, gl_TexCoord[0].xy - vOffset1.zw).x);
+		vec4 vDepth = vec4(	texture(depthMap, gl_TexCoord[0].xy + vOffset1.xy).x,
+					texture(depthMap, gl_TexCoord[0].xy + vOffset1.zw).x,
+					texture(depthMap, gl_TexCoord[0].xy - vOffset1.xy).x,
+					texture(depthMap, gl_TexCoord[0].xy - vOffset1.zw).x);
 		
 		//The z difference in world coords multplied with DepthDiffMul
 		vec4 vDiff = (fCoreDepth - vDepth) * fFarPlaneMulDepthDiffMul;

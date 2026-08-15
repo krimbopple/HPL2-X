@@ -3,7 +3,7 @@
 //
 // A basic fragment that uses no texture or color
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 void main()
 {

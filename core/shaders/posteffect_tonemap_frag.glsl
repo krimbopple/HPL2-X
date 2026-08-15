@@ -1,4 +1,4 @@
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 uniform sampler2DRect aDiffuseMap;
@@ -30,7 +30,7 @@ vec3 ACESFilm(vec3 x)
 
 void main()
 {
-	vec3 vColor = texture2DRect(aDiffuseMap, gl_TexCoord[0].xy).rgb;
+	vec3 vColor = texture(aDiffuseMap, gl_TexCoord[0].xy).rgb;
 	
 	vColor *= afExposure;
 	

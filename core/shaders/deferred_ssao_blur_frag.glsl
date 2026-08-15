@@ -1,4 +1,4 @@
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 ////////////////////
@@ -34,7 +34,7 @@ void main()
 	@endif
 
 	//Get the core (at center) depth and create the minimum depth based on that.
-	float fCoreDepth = texture2DRect(depthMap, gl_FragCoord.xy).x;
+	float fCoreDepth = texture(depthMap, gl_FragCoord.xy).x;
 	float fMinDepth =  fCoreDepth - 0.2 / afFarPlane;
 	//float fMaxDepth =  fCoreDepth + 0.5 / afFarPlane; <- can skip since it does not give that much impact.
 	
@@ -54,8 +54,8 @@ void main()
 		vec2 vCoordOffset = fOffset[i] * vOffsetMul;
 		vec2 vUVPos = gl_TexCoord[0].xy + vCoordOffset;
 				
-		vec3 vOcc = texture2DRect(occMap, vUVPos).xyz;
-		float fDepth = texture2DRect(depthMap, vUVPos).x;
+		vec3 vOcc = texture(occMap, vUVPos).xyz;
+		float fDepth = texture(depthMap, vUVPos).x;
 	
 		float fMul = vMul[i];
 		

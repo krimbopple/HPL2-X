@@ -3,7 +3,7 @@
 //
 //
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 @include helper_float_packing.glsl
@@ -11,11 +11,11 @@
 
 ////////////////////
 //Normal interpolated values
-varying vec3 gvNormal;
+in vec3 gvNormal;
 
 @ifdef UseNormalMapping
-	varying vec3 gvTangent;
-	varying vec3 gvBinormal;
+	in vec3 gvTangent;
+	in vec3 gvBinormal;
 @endif
 
 /////////////////////
@@ -23,12 +23,12 @@ varying vec3 gvNormal;
 
 //32 bit G-Buffer
 @ifdef Deferred_32bit
-	varying float gfLinearDepth;
+	in float gfLinearDepth;
 @endif
 
 //64 bit G-Buffer
 @ifdef Deferred_64bit || UseEnvMap
-	varying vec3 gvVertexPos;	
+	in vec3 gvVertexPos;	
 @endif
 
 ////////////////////
@@ -52,7 +52,7 @@ uniform sampler2D aDiffuseMap;
 	
 	uniform vec2 avHeightMapScaleAndBias;
 	
-	varying vec3 gvTangentEyePos;
+	in vec3 gvTangentEyePos;
 @endif
 
 @ifdef UseEnvMap
@@ -84,7 +84,7 @@ void RayLinearIntersectionSM2(sampler2D aHeightMap, inout vec3 avPosition, inout
 
 	for(int i=0; i<lSearchSteps-1; i++) 
 	{ 
-		float fDepth = texture2D(aHeightMap, avPosition.xy).w; 
+		float fDepth = texture(aHeightMap, avPosition.xy).w; 
 		if(avPosition.z < fDepth) avPosition += avEyeVec; 
 	} 	
 }
@@ -95,7 +95,7 @@ void RayLinearIntersectionSM3(sampler2D aHeightMap, float afSearchSteps, inout v
 
 	for(int i=0; i<afSearchSteps-1; i++) 
 	{ 
-		float fDepth = texture2D(aHeightMap, avPosition.xy).w; 
+		float fDepth = texture(aHeightMap, avPosition.xy).w; 
 		if(avPosition.z < fDepth) avPosition += avEyeVec; 
 	} 
 }
@@ -106,7 +106,7 @@ void RayBinaryIntersection(sampler2D aHeightMap, inout vec3 avPosition, inout ve
 	const int lSearchSteps = 6; 
 	for(int i=0; i<lSearchSteps; i++) 
 	{ 
-		float fDepth = texture2D(aHeightMap, avPosition.xy).w;
+		float fDepth = texture(aHeightMap, avPosition.xy).w;
 		if(avPosition.z < fDepth) 
 			avPosition += avEyeVec; 
 		
@@ -153,21 +153,21 @@ void main()
 			vec2 vTexCoord = vHeightMapPos.xy;
 		@else				
 			vec3 vEyeVec = normalize(gvTangentEyePos);
-			float fHeight = texture2D(aHeightMap, gl_TexCoord[0].xy).w;	
+			float fHeight = texture(aHeightMap, gl_TexCoord[0].xy).w;	
 			
 			float fDisplacement = fHeight * avHeightMapScaleAndBias.x;// + avHeightMapScaleAndBias.y; <- skip bias, since relief does not support it!
 			
 			vec2 vTexCoord = (vEyeVec * fDisplacement + gl_TexCoord[0].xyz).xy;
 		@endif
 		
-		vec4 vDiffuseColor = texture2D(aDiffuseMap, vTexCoord);
+		vec4 vDiffuseColor = texture(aDiffuseMap, vTexCoord);
 		
 		//gl_FragData[0] = vec4(0,0,0,1);
 		//gl_FragData[0].xyz = vec3(vHeightMapPos.z);
-		//gl_FragData[0].xyz = vec3(texture2D(aHeightMap, gl_TexCoord[0].xy).w);
+		//gl_FragData[0].xyz = vec3(texture(aHeightMap, gl_TexCoord[0].xy).w);
 	@else
 		vec2 vTexCoord = gl_TexCoord[0].xy;
-		vec4 vDiffuseColor = texture2D(aDiffuseMap, vTexCoord);
+		vec4 vDiffuseColor = texture(aDiffuseMap, vTexCoord);
 	@endif
 	
 	
@@ -181,7 +181,7 @@ void main()
 	//////////////////////////////////
 	//Normal
 	@ifdef UseNormalMapping
-		vec3 vNormal = texture2D(aNormalMap,vTexCoord).xyz - 0.5; //No need for full unpack x*2-1, becuase normal is normalized. (but now we do not normalize...)
+		vec3 vNormal = texture(aNormalMap,vTexCoord).xyz - 0.5; //No need for full unpack x*2-1, becuase normal is normalized. (but now we do not normalize...)
 		vec3 vScreenNormal = normalize(vNormal.x * gvTangent + vNormal.y * gvBinormal + vNormal.z * gvNormal);
 	@else
 		vec3 vScreenNormal = normalize(gvNormal);
@@ -202,13 +202,13 @@ void main()
 		vec3 vEnvUv = reflect(vCameraSpaceEyeVec, vScreenNormal);
 		vEnvUv = (a_mtxInvViewRotation * vec4(vEnvUv,1)).xyz;
 					
-		vec4 vReflectionColor = textureCube(aEnvMap, vEnvUv);
+		vec4 vReflectionColor = texture(aEnvMap, vEnvUv);
 		
 		float afEDotN = max(dot(-vCameraSpaceEyeVec, vScreenNormal),0.0);
 		float fFresnel = Fresnel(afEDotN, avFrenselBiasPow.x, avFrenselBiasPow.y);
 		
 		@ifdef UseCubeMapAlpha
-			float fEnvMapAlpha = texture2D(aEnvMapAlphaMap, vTexCoord).w;
+			float fEnvMapAlpha = texture(aEnvMapAlphaMap, vTexCoord).w;
 			vReflectionColor *= fEnvMapAlpha;
 		@endif
 				
@@ -234,13 +234,13 @@ void main()
 	//Specular
 	@ifdef RenderTargets_4
 		@ifdef UseSpecular
-			gl_FragData[3].xy = texture2D(aSpecularMap, vTexCoord).xy;
+			gl_FragData[3].xy = texture(aSpecularMap, vTexCoord).xy;
 		@else
 			gl_FragData[3].xy = vec2(0.0);
 		@endif
 	@else
 		@ifdef UseSpecular
-			vec2 vSpecVals = texture2D(aSpecularMap, vTexCoord).xy;
+			vec2 vSpecVals = texture(aSpecularMap, vTexCoord).xy;
 			gl_FragData[1].w = vSpecVals.x;
 			gl_FragData[2].w = vSpecVals.y;
 		@else

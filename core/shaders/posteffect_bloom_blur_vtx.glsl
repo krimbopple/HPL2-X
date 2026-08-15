@@ -3,7 +3,7 @@
 //
 // Blur effect for the bloom post effect
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 void main()
 {	

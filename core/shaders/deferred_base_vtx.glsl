@@ -3,32 +3,32 @@
 //
 //
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 //---------------------------------------------
 
 @ifdef UseNormals
-	varying vec3 gvNormal;
+	out vec3 gvNormal;
 @endif
 @ifdef UseNormalMapping
-	varying vec3 gvTangent;
-	varying vec3 gvBinormal;
+	out vec3 gvTangent;
+	out vec3 gvBinormal;
 @endif
 
 @ifdef UseColor
-	varying vec4 gvColor;
+	out vec4 gvColor;
 @endif
 
 //32 bit G-Buffer
 @ifdef Deferred_32bit
-	varying float gfLinearDepth;
+	out float gfLinearDepth;
 	
 	uniform float afInvFarPlane;
 //64 bit G-Buffer
 @endif
 	
 @ifdef Deferred_64bit || UseVertexPosition || UseEnvMap || UseFog || UseRefraction
-	varying vec3 gvVertexPos;	
+	out vec3 gvVertexPos;	
 @endif
 
 @ifdef DeferredLight
@@ -36,18 +36,18 @@
 	//Only need to cacluate position for 32 bit version
 	@ifdef Deferred_32bit
 		uniform float afNegFarPlane;
-		varying vec3 gvFarPlanePos;
+		out vec3 gvFarPlanePos;
 	@endif
 	
 	@ifdef UseBatching
-		varying vec3 gvLightPosition;		
-		varying vec4 gvLightColor;
-		varying float gfLightRadius;
+		out vec3 gvLightPosition;		
+		out vec4 gvLightColor;
+		out float gfLightRadius;
 	@endif
 @endif
 
 @ifdef UseParallax
-	varying vec3 gvTangentEyePos;
+	out vec3 gvTangentEyePos;
 @endif
 
 @ifdef UseUvAnimation
@@ -67,7 +67,7 @@ void main()
 {	
 	//////////////////////
 	// Position
-	gl_Position = ftransform();
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	
 	
 	//////////////////////

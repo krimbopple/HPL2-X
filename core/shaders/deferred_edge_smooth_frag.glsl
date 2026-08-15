@@ -3,7 +3,7 @@
 //
 // Unpacks the depth map of the gbuffer into the red channel.
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -27,24 +27,24 @@ void main()
 		
 	//////////////////
 	// Check normal discontinuity
-	vec3 vCoreNormal = texture2DRect(normalTexture, gl_FragCoord.xy).xyz*2.0-1.0;
+	vec3 vCoreNormal = texture(normalTexture, gl_FragCoord.xy).xyz*2.0-1.0;
 	vec4 vNormalDotCore;
-	vNormalDotCore.x = dot( vCoreNormal, texture2DRect(normalTexture, vScreenPos + vec2(0.0,fD) ).xyz*2.0-1.0 );
-	vNormalDotCore.y = dot( vCoreNormal, texture2DRect(normalTexture, vScreenPos + vec2(0.0,-fD) ).xyz*2.0-1.0 );
-	vNormalDotCore.z = dot( vCoreNormal, texture2DRect(normalTexture, vScreenPos + vec2(fD,0.0) ).xyz*2.0-1.0 );
-	vNormalDotCore.w = dot( vCoreNormal, texture2DRect(normalTexture, vScreenPos + vec2(-fD,0.0) ).xyz*2.0-1.0 );
+	vNormalDotCore.x = dot( vCoreNormal, texture(normalTexture, vScreenPos + vec2(0.0,fD) ).xyz*2.0-1.0 );
+	vNormalDotCore.y = dot( vCoreNormal, texture(normalTexture, vScreenPos + vec2(0.0,-fD) ).xyz*2.0-1.0 );
+	vNormalDotCore.z = dot( vCoreNormal, texture(normalTexture, vScreenPos + vec2(fD,0.0) ).xyz*2.0-1.0 );
+	vNormalDotCore.w = dot( vCoreNormal, texture(normalTexture, vScreenPos + vec2(-fD,0.0) ).xyz*2.0-1.0 );
 	vNormalDotCore = step(0.0, vNormalDotCore - vec4(0.8)); //Negate the limit for minimum dot product.
 	
 	float fNormalT = 1.0 - max( dot( vNormalDotCore, vec4(0.25) ), 0.0);
 	
 	//////////////////
 	// Check depth discontinuity
-	float fCoreDepth = texture2DRect(depthTexture, gl_FragCoord.xy).x;
+	float fCoreDepth = texture(depthTexture, gl_FragCoord.xy).x;
 	vec4 vDepthDiff;
-	vDepthDiff.x  = texture2DRect(depthTexture, vScreenPos + vec2(0.0,fD) ).x + texture2DRect(depthTexture, vScreenPos + vec2(0.0,-fD)).x;
-	vDepthDiff.y  = texture2DRect(depthTexture, vScreenPos + vec2(fD,0.0) ).x + texture2DRect(depthTexture, vScreenPos + vec2(-fD,0.0)).x;
-	vDepthDiff.z  = texture2DRect(depthTexture, vScreenPos + vec2(fD,fD) ).x + texture2DRect(depthTexture, vScreenPos + vec2(-fD,-fD)).x;
-	vDepthDiff.w  = texture2DRect(depthTexture, vScreenPos + vec2(fD,-fD) ).x + texture2DRect(depthTexture, vScreenPos + vec2(fD,-fD)).x;
+	vDepthDiff.x  = texture(depthTexture, vScreenPos + vec2(0.0,fD) ).x + texture(depthTexture, vScreenPos + vec2(0.0,-fD)).x;
+	vDepthDiff.y  = texture(depthTexture, vScreenPos + vec2(fD,0.0) ).x + texture(depthTexture, vScreenPos + vec2(-fD,0.0)).x;
+	vDepthDiff.z  = texture(depthTexture, vScreenPos + vec2(fD,fD) ).x + texture(depthTexture, vScreenPos + vec2(-fD,-fD)).x;
+	vDepthDiff.w  = texture(depthTexture, vScreenPos + vec2(fD,-fD) ).x + texture(depthTexture, vScreenPos + vec2(fD,-fD)).x;
 	vDepthDiff = abs( vec4(2*fCoreDepth) - vDepthDiff )*afFarPlane - vec4(0.5); //negate limit value for minum depth.
 	vDepthDiff = step(0.0, vDepthDiff);
 	
@@ -54,11 +54,11 @@ void main()
 	// Smooth at screen pos
 	float fT = fDepthT*0.5 + fNormalT*0.5;
 	
-	vec3 vColor = texture2DRect(screenTexture, vScreenPos).xyz * (1.0 - fT);
-	vColor += texture2DRect(screenTexture, vScreenPos + vec2(0.0,fD) ).xyz * fT;
-	vColor += texture2DRect(screenTexture, vScreenPos + vec2(0.0,-fD) ).xyz * fT;
-	vColor += texture2DRect(screenTexture, vScreenPos + vec2(fD,0.0) ).xyz * fT;
-	vColor += texture2DRect(screenTexture, vScreenPos + vec2(-fD,0.0) ).xyz * fT;
+	vec3 vColor = texture(screenTexture, vScreenPos).xyz * (1.0 - fT);
+	vColor += texture(screenTexture, vScreenPos + vec2(0.0,fD) ).xyz * fT;
+	vColor += texture(screenTexture, vScreenPos + vec2(0.0,-fD) ).xyz * fT;
+	vColor += texture(screenTexture, vScreenPos + vec2(fD,0.0) ).xyz * fT;
+	vColor += texture(screenTexture, vScreenPos + vec2(-fD,0.0) ).xyz * fT;
 	
 	vColor *= 1.0 / ((1.0 - fT) + fT*4.0);	
 	

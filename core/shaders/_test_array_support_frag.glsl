@@ -4,7 +4,7 @@
 // A shader that test if the const arrays are supported.
 ////////////////////////////////////////////////////////
 
-#version 120
+#version 130
 
 const float vMul[5] = float[5]   ( 0.25,  0.3, 0.5, 0.3, 0.25);
 

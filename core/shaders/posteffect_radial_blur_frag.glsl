@@ -3,7 +3,7 @@
 //
 // Do a blur based on the dist from center
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -45,7 +45,7 @@ void main()
 	
 	for(int i=0; i<5; ++i)
 	{
-		vDiffuseColor += texture2DRect(diffuseMap, vScreenCoord+vDir*vSizeMul[i]).xyz * vColorMul[i];
+		vDiffuseColor += texture(diffuseMap, vScreenCoord+vDir*vSizeMul[i]).xyz * vColorMul[i];
 	}
 	
 	vDiffuseColor /= fTotalMul;

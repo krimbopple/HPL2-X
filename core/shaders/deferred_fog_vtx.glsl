@@ -3,16 +3,16 @@
 //
 //
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 //---------------------------------------------
 
-varying vec3 gvVertexPos;	
+out vec3 gvVertexPos;	
 
 //---------------------------------------------
 
 @ifdef OutsideBox && UseBackside
-	varying vec3 gvLocalBoxRay;
+	out vec3 gvLocalBoxRay;
 	
 	uniform mat4 a_mtxBoxInvViewModelRotation;
 @endif
@@ -25,7 +25,7 @@ void main()
 {	
 	//////////////////////
 	// Position
-	gl_Position = ftransform();
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	
 	
 	gvVertexPos = (gl_ModelViewMatrix * gl_Vertex).xyz;

@@ -10,7 +10,7 @@
 // the stored depth value since it is wanted_pos.z/farplane.
 //	
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 @include helper_float_packing.glsl
@@ -23,7 +23,7 @@
 
 float ShadowOffsetLookup(sampler2DShadow aShadowMap, vec4 avLocation, vec2 avOffset)
 {
-	return shadow2DProj(aShadowMap, vec4(avLocation.xy + avOffset, avLocation.z, avLocation.w) ).x;
+	return textureProj(aShadowMap, vec4(avLocation.xy + avOffset, avLocation.z, avLocation.w) );
 }
 
 
@@ -33,12 +33,12 @@ float ShadowOffsetLookup(sampler2DShadow aShadowMap, vec4 avLocation, vec2 avOff
 
 ////////////////////
 //Varying varaibles
-varying vec3 gvFarPlanePos;	//The pixel postion projected to the far plane
+in vec3 gvFarPlanePos;	//The pixel postion projected to the far plane
 
 @ifdef UseBatching
-	varying vec3 gvLightPosition;		
-	varying vec4 gvLightColor;
-	varying float gfLightRadius;
+	in vec3 gvLightPosition;		
+	in vec4 gvLightColor;
+	in float gfLightRadius;
 @endif
 
 ////////////////////
@@ -139,11 +139,11 @@ void main()
 	/////////////////////////////////
 	//Get values from samplers
 	vec2 vMapCoords = gl_FragCoord.xy;
-	vec4 vColorVal =  texture2DRect(aDiffuseMap, vMapCoords);
-	vec4 vNormalVal = texture2DRect(aNormalMap, vMapCoords);
-	vec4 vDepthVal =  texture2DRect(aDepthMap, vMapCoords);
+	vec4 vColorVal =  texture(aDiffuseMap, vMapCoords);
+	vec4 vNormalVal = texture(aNormalMap, vMapCoords);
+	vec4 vDepthVal =  texture(aDepthMap, vMapCoords);
 	@ifdef RenderTargets_4
-		vec4 vExtraVal = texture2DRect(aExtraMap, vMapCoords);
+		vec4 vExtraVal = texture(aExtraMap, vMapCoords);
 	@endif
 		
 	/////////////////////////////////
@@ -178,7 +178,7 @@ void main()
 	/////////////////////////////////
 	// Light direction and attenuation
 	vec3 vLightDir = (avLightPos - vPos)*afInvLightRadius;
-	float fAttenuatuion =  texture1D(aAttenuationMap,dot(vLightDir,vLightDir)).x;	
+	float fAttenuatuion =  texture(aAttenuationMap,dot(vLightDir,vLightDir)).x;	
 	vLightDir = normalize( vLightDir );
 	
 	//////////////////////////////
@@ -186,17 +186,17 @@ void main()
 	@ifdef LightType_Spot
 		@ifdef UseGobo
 			vec4 vProjectedUv = a_mtxSpotViewProj * vec4(vPos,1.0);
-			vec3 vGoboVal = texture2DProj(aGoboMap, vProjectedUv).xyz;
+			vec3 vGoboVal = textureProj(aGoboMap, vProjectedUv).xyz;
 		@else
 			float fOneMinusCos = 1.0 - dot( vLightDir,  avLightForward);
-			fAttenuatuion *= texture1D(aSpotFalloffMap, fOneMinusCos / afOneMinusCosHalfSpotFOV).x;
+			fAttenuatuion *= texture(aSpotFalloffMap, fOneMinusCos / afOneMinusCosHalfSpotFOV).x;
 		@endif
 	//////////////////////////////
 	//Point gobo
 	@else
 		@ifdef UseGobo
 			vec4 vWorldLightDir = a_mtxInvViewRotation * vec4(vLightDir,1.0);
-			vec3 vGoboVal = textureCube(aGoboMap, vWorldLightDir.xyz).xyz;
+			vec3 vGoboVal = texture(aGoboMap, vWorldLightDir.xyz).xyz;
 		@endif
 	@endif
 	
@@ -250,7 +250,7 @@ void main()
 	// No Smoothing
 	@ifdef ShadowMapQuality_Low
 	
-		fAttenuatuion *= shadow2DProj(aShadowMap, vProjectedUv).x;
+		fAttenuatuion *= textureProj(aShadowMap, vProjectedUv);
 				
 	///////////////////////
 	// Smoothing
@@ -331,7 +331,7 @@ void main()
 				{
 					vec2 vJitterLookupCoord = vec2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ);
 					
-					vec4 vOffset = texture2D(aShadowOffsetMap, vJitterLookupCoord) *2.0-1.0;
+					vec4 vOffset = texture(aShadowOffsetMap, vJitterLookupCoord) *2.0-1.0;
 									
 					fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.xy) * avShadowMapOffsetMul ) / 4.0;
 					fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.zw) * avShadowMapOffsetMul ) / 4.0;
@@ -350,9 +350,9 @@ void main()
 					// Fullscale filtering
 					for(int i=0; i<$ShadowJitterSamplesDiv2-2.0; i++)
 					{
-						vec2 vJitterLookupCoord = vec2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ); //Not that coords are 0-1!
-					
-						vec4 vOffset = texture2D(aShadowOffsetMap, vJitterLookupCoord) *2.0 - 1.0;
+					vec2 vJitterLookupCoord = vec2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ); //Not that coords are 0-1!
+				
+					vec4 vOffset = texture(aShadowOffsetMap, vJitterLookupCoord) *2.0 - 1.0;
 															
 						fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.xy) * avShadowMapOffsetMul ) / $ShadowJitterSamples;
 						fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.zw) * avShadowMapOffsetMul ) / $ShadowJitterSamples;
@@ -376,7 +376,7 @@ void main()
 				{
 					vec2 vJitterLookupCoord = vec2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ);
 					
-					vec4 vOffset = texture2D(aShadowOffsetMap, vJitterLookupCoord) *2.0 - 1.0;
+					vec4 vOffset = texture(aShadowOffsetMap, vJitterLookupCoord) *2.0 - 1.0;
 					
 					fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.xy) * avShadowMapOffsetMul );
 					fShadowSum += ShadowOffsetLookup(aShadowMap, vProjectedUv, vec2(vOffset.zw) * avShadowMapOffsetMul );

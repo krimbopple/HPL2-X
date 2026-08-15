@@ -3,26 +3,26 @@
 //
 // A basic fragment with little fancy stuff.
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 @include helper_reflection.glsl
 
-varying vec4 gvColor;
+in vec4 gvColor;
 
 @ifdef UseFog || UseRefraction  || UseEnvMap
-	varying vec3 gvVertexPos;
+	in vec3 gvVertexPos;
 @endif
 
 
 ////////////////////
 //Normal interpolated values
 @ifdef UseRefraction  || UseEnvMap
-	varying vec3 gvNormal;
+	in vec3 gvNormal;
 
 	@ifdef UseNormalMapping
-		varying vec3 gvTangent;
-		varying vec3 gvBinormal;
+		in vec3 gvTangent;
+		in vec3 gvBinormal;
 	@endif
 @endif
 
@@ -84,7 +84,7 @@ void main()
 	////////////////////
 	//Diffuse 
 	@ifdef UseDiffuseMap
-		vFinalColor = texture2D(aDiffuseMap, gl_TexCoord[0].xy) * gvColor;
+		vFinalColor = texture(aDiffuseMap, gl_TexCoord[0].xy) * gvColor;
 	@else
 		vFinalColor = vec4(0.0, 0.0 ,0.0, 1.0);
 	@endif
@@ -129,7 +129,7 @@ void main()
 	//Normalmap
 	@ifdef UseRefraction  || UseEnvMap
 		@ifdef UseNormalMapping
-			vec3 vNMapNormal = texture2D(aNormalMap, gl_TexCoord[0].xy).xyz*2.0 - 1.0; 
+			vec3 vNMapNormal = texture(aNormalMap, gl_TexCoord[0].xy).xyz*2.0 - 1.0; 
 			
 			@ifdef UseScreenNormal || UseEnvMap
 				vec3 vScreenNormal = normalize(vNMapNormal.x * gvTangent + vNMapNormal.y * gvBinormal + vNMapNormal.z * gvNormal);
@@ -166,7 +166,7 @@ void main()
 			vec2 vDistortedScreenPos = gl_FragCoord.xy + vScreenNormal.xy  * afRefractionScale * fInvDist;
 		@endif
 		
-		vec4 vRefractionColor = texture2DRect(aRefractionMap, vDistortedScreenPos);
+		vec4 vRefractionColor = texture(aRefractionMap, vDistortedScreenPos);
 		
 		///////////////////////
 		// Do blending in shader (blend mode is None with refraction)		
@@ -203,11 +203,11 @@ void main()
 		vec3 vEnvUv = reflect(vEyeVec, vScreenNormal);
 		vEnvUv = (a_mtxInvViewRotation * vec4(vEnvUv,1)).xyz;
 					
-		vec4 vReflectionColor = textureCube(aEnvMap,vEnvUv);
+		vec4 vReflectionColor = texture(aEnvMap,vEnvUv);
 		
 		//Alpha for environment map
 		@ifdef UseCubeMapAlpha
-			float fEnvMapAlpha = texture2D(aEnvMapAlphaMap, gl_TexCoord[0].xy).w;
+			float fEnvMapAlpha = texture(aEnvMapAlphaMap, gl_TexCoord[0].xy).w;
 			vReflectionColor *= fEnvMapAlpha;
 		@endif
 		

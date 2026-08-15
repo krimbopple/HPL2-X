@@ -3,7 +3,7 @@
 //
 // Just set up the texture for a dest blend
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -14,7 +14,7 @@ uniform float afAlpha;
 
 void main()
 {
-	vec3 vDiffuseColor = texture2DRect(diffuseMap, gl_TexCoord[0].xy).xyz;
+	vec3 vDiffuseColor = texture(diffuseMap, gl_TexCoord[0].xy).xyz;
 	
 	gl_FragColor.xyz = vDiffuseColor;
 	gl_FragColor.w = afAlpha;

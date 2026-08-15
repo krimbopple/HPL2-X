@@ -3,7 +3,7 @@
 //
 // Used in a sepperate pass to render illuminating parts of a material.
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 uniform sampler2D aDiffuse;
 @define sampler_aDiffuse 0
@@ -12,5 +12,5 @@ uniform float afColorMul;
 
 void main()
 {
-	gl_FragColor = texture2D(aDiffuse, gl_TexCoord[0].xy) * afColorMul;
+	gl_FragColor = texture(aDiffuse, gl_TexCoord[0].xy) * afColorMul;
 }

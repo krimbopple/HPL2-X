@@ -3,7 +3,7 @@
 //
 //
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 #extension GL_ARB_draw_buffers : enable
 
 
@@ -18,6 +18,6 @@ uniform samplerCube aDiffuseMap;
 // Main program
 void main()
 {
-	gl_FragData[0].xyz = textureCube(aDiffuseMap, gl_TexCoord[0].xyz).xyz;
+	gl_FragData[0].xyz = texture(aDiffuseMap, gl_TexCoord[0].xyz).xyz;
 	gl_FragData[1].xyz = vec3(1);
 }

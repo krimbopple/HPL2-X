@@ -3,7 +3,7 @@
 //
 // Unpacks the depth map of the gbuffer into the red channel.
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -22,10 +22,10 @@ void main()
 {
 	//32 bit G-Buffer
 	@ifdef Deferred_32bit
-		float fDepth = UnpackVec3ToFloat(texture2DRect(depthTexture, gl_TexCoord[0].xy).xyz);
+		float fDepth = UnpackVec3ToFloat(texture(depthTexture, gl_TexCoord[0].xy).xyz);
 	//64 bit G-Buffer
 	@elseif Deferred_64bit
-		float fDepth = texture2DRect(depthTexture, gl_TexCoord[0].xy).z * afNegInvFarPlane;
+		float fDepth = texture(depthTexture, gl_TexCoord[0].xy).z * afNegInvFarPlane;
 	@endif
 	
 	

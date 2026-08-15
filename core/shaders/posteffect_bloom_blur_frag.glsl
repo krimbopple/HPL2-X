@@ -4,7 +4,7 @@
 // Blur effect for the bloom post effect
 ////////////////////////////////////////////////////////
 
-#version 120
+#version 130
 #extension GL_ARB_texture_rectangle : enable
 
 uniform sampler2DRect diffuseMap;
@@ -40,7 +40,7 @@ void main()
 	for(int i=0; i<5; i+=1)
 	{	
 		vec2 vOffset = vec2(fOffset[i])*vOffsetMul;
-		vec3 vColor = texture2DRect(diffuseMap, gl_TexCoord[0].xy + vOffset).xyz;
+		vec3 vColor = texture(diffuseMap, gl_TexCoord[0].xy + vOffset).xyz;
 		vAmount += vColor * vMul[i];
 	}
 	

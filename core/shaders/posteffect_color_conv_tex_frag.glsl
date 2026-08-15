@@ -3,7 +3,7 @@
 //
 // Blur effect for the bloom post effect
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -19,11 +19,11 @@ uniform sampler1D convMap;
 
 void main()
 {
-	vec3 vDiffuseColor = texture2DRect(diffuseMap, gl_TexCoord[0].xy).xyz;
+	vec3 vDiffuseColor = texture(diffuseMap, gl_TexCoord[0].xy).xyz;
 	
-	vec3 vOutput =  vec3	(texture1D(convMap, vDiffuseColor.x).x,
-			  	 texture1D(convMap, vDiffuseColor.y).y,
-				 texture1D(convMap, vDiffuseColor.z).z);
+	vec3 vOutput =  vec3	(texture(convMap, vDiffuseColor.x).x,
+			  	 texture(convMap, vDiffuseColor.y).y,
+				 texture(convMap, vDiffuseColor.z).z);
 	
 	@ifdef UseFadeAlpha
 		gl_FragColor.xyz = vOutput*afFadeAlpha + vDiffuseColor*(1-afFadeAlpha);

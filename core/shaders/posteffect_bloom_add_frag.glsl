@@ -3,7 +3,7 @@
 //
 // Blur effect for the bloom post effect
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -17,8 +17,8 @@ uniform vec3 avRgbToIntensity;
 
 void main()
 {
-	vec4 vBlurColor = 	texture2DRect(blurMap, 	  gl_TexCoord[0].xy);
-	vec4 vDiffuseColor = 	texture2DRect(diffuseMap, gl_TexCoord[1].xy);
+	vec4 vBlurColor = 	texture(blurMap, 	  gl_TexCoord[0].xy);
+	vec4 vDiffuseColor = 	texture(diffuseMap, gl_TexCoord[1].xy);
 	
 	vBlurColor *= vBlurColor * dot(vBlurColor.xyz, avRgbToIntensity);
 	

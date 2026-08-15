@@ -3,7 +3,7 @@
 //
 // Fragment shader for all things fog!
 ////////////////////////////////////////////////////////
-#version 120
+#version 130
 
 #extension GL_ARB_texture_rectangle : enable
 
@@ -11,10 +11,10 @@
 
 //--------------------------------------------------------------
 
-varying vec3 gvVertexPos;
+in vec3 gvVertexPos;
 
 @ifdef OutsideBox && UseBackside
-	varying vec3 gvLocalBoxRay;
+	in vec3 gvLocalBoxRay;
 @endif
 
 //--------------------------------------------------------------
@@ -67,12 +67,12 @@ void main()
 	////////////////////////////////////
 	// Get depth
 	@ifdef PackedDepth
-		vec4 vDepthVal =  texture2DRect(aDepthMap, gl_FragCoord.xy);
+		vec4 vDepthVal =  texture(aDepthMap, gl_FragCoord.xy);
 		float fDepth = -UnpackVec3ToFloat(vDepthVal.xyz) * afNegFarPlane;
 
 	//64 bit stores postion directly
 	@else
-		float fDepth = -texture2DRect(aDepthMap, gl_FragCoord.xy).z;
+		float fDepth = -texture(aDepthMap, gl_FragCoord.xy).z;
 	@endif
 	
 	////////////////////////////////////
