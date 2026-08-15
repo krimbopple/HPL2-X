@@ -6,6 +6,7 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 ### Engine (HPL2)
 #### Added
 - HDR rendering & Tone mapping post effects
+- Linear space lighting
 - PCF Soft Shadow support, as an alternative to the existing hard jagged ones
 - Live window resizing and renderer reloading for resolution changes
 - Hardware cursor instead of software
@@ -23,6 +24,7 @@ All notable changes to HPL2-X / Amnesia will be documented in this file.
 ### The Dark Descent
 #### Added
 - HDR and Tone Mapping options in graphics settings (off by default, may alter the game's look)
+- Linear Space Lighting option in graphics settings (off by default, may alter the game's look, and works best with HDR)
 - PCF Soft Shadows option in graphics settings (off by default, may alter the game's look)
 - "Press any key" prompt to skip pre-menu splash screens.
 - Live window resizing and renderer reloading for resolution changes

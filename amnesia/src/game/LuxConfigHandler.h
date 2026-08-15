@@ -71,6 +71,7 @@ public:
 	bool mbToneMap;
 	float mfToneMapExposure;
 	float mfToneMapGamma;
+	bool mbLinearSpaceLighting;
 
 	bool mbSSAOActive;
 	int mlSSAOSamples;

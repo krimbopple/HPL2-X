@@ -179,6 +179,7 @@ private:
 
 	cWidgetCheckBox *mpChBHDR;
 	cWidgetCheckBox *mpChBToneMap;
+	cWidgetCheckBox *mpChBLinearSpaceLighting;
 
 	cWidgetCheckBox *mpChBWorldReflection;
 	cWidgetCheckBox *mpChBRefraction;

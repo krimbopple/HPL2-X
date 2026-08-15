@@ -12,5 +12,11 @@ uniform float afColorMul;
 
 void main()
 {
-	gl_FragColor = texture(aDiffuse, gl_TexCoord[0].xy) * afColorMul;
+	vec4 vColor = texture(aDiffuse, gl_TexCoord[0].xy);
+	
+	@ifdef LinearSpace
+		vColor.rgb = pow(vColor.rgb, vec3(2.2));
+	@endif
+	
+	gl_FragColor = vColor * afColorMul;
 }

@@ -740,7 +740,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 	////////////////////////////
 	// Disclaimer
 	cWidgetLabel *pDisclaimer = mpGuiSet->CreateWidgetLabel(cVector3f(10*fScale, 2*fScale, 0.1f), cVector2f(500*fScale, 40*fScale),
-		GetOptionsMenuString("GfxModsDisclaimer", _W("Note: Some options below (HDR, tone mapping) are enhancements that change how the game looks. They are off by default.")),
+		GetOptionsMenuString("GfxModsDisclaimer", _W("Note: Some options below (HDR, tone mapping, linear space lighting) are enhancements that change how the game looks. They are off by default.")),
 		pMainFrame);
 	pDisclaimer->SetDefaultFontColor(cColor(0.85f, 0.85f, 0.6f));
 	pDisclaimer->SetWordWrap(true);
@@ -845,7 +845,7 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 	////////////////////////////
 	// Post Effects
-	pGroup = mpGuiSet->CreateWidgetGroup(vPos, cVector2f(vGroupSize.x, 115*fScale), kTranslate("OptionsMenu","PostEffects"), pMainFrame);
+	pGroup = mpGuiSet->CreateWidgetGroup(vPos, cVector2f(vGroupSize.x, 150*fScale), kTranslate("OptionsMenu","PostEffects"), pMainFrame);
 	{
 		float fBorderSize = 15 * fScale;
 		float fInputSep = 10 * fScale;
@@ -909,6 +909,12 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		// ToneMap
 		mpChBToneMap = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, GetOptionsMenuString("ToneMap", _W("Tone Mapping")), pGroup);
 		SetUpInput(NULL, mpChBToneMap, false, GetOptionsMenuString("ToneMapTip", _W("Adjusts brightness and color for a more film-like look.")));
+
+		vPosInGroup.y += mpChBToneMap->GetSize().y + fInputSep;
+
+		// Linear Space Lighting
+		mpChBLinearSpaceLighting = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, GetOptionsMenuString("LinearSpaceLighting", _W("Linear Space Lighting")), pGroup);
+		SetUpInput(NULL, mpChBLinearSpaceLighting, false, GetOptionsMenuString("LinearSpaceLightingTip", _W("Shades in linear space instead of gamma space. More physically correct but changes how existing content looks. Works best with HDR. Requires a restart.")));
 	}
 
 	vPos.y += pGroup->GetSize().y + 10*fScale;
@@ -1064,7 +1070,9 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		mpChBHDR->SetFocusNavigation(eUIArrow_Up, mpChBInsanity);
 		mpChBHDR->SetFocusNavigation(eUIArrow_Down, mpChBToneMap);
 		mpChBToneMap->SetFocusNavigation(eUIArrow_Up, mpChBHDR);
-		mpChBToneMap->SetFocusNavigation(eUIArrow_Down, mpCBSSAOResolution);
+		mpChBToneMap->SetFocusNavigation(eUIArrow_Down, mpChBLinearSpaceLighting);
+		mpChBLinearSpaceLighting->SetFocusNavigation(eUIArrow_Up, mpChBToneMap);
+		mpChBLinearSpaceLighting->SetFocusNavigation(eUIArrow_Down, mpCBSSAOResolution);
 	}
 
 	{
@@ -1515,6 +1523,8 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 			mpChBHDR->SetChecked(aObj.GetVarBool("HDR"), false);
 			// ToneMap
 			mpChBToneMap->SetChecked(aObj.GetVarBool("ToneMap"), false);
+			// Linear Space Lighting
+			mpChBLinearSpaceLighting->SetChecked(aObj.GetVarBool("LinearSpaceLighting"), false);
 		}
 
 		// Gamma
@@ -1746,6 +1756,14 @@ void cLuxMainMenu_Options::ApplyChanges()
 		pCfgHdr->mbHDR = mpChBHDR->IsChecked();
 		pCfgHdr->mbToneMap = mpChBToneMap->IsChecked();
 		if(bHDRChanged)
+		{
+			pCfgHdr->SetGameNeedsRestart();
+		}
+
+		// Linear Space Lighting
+		bool bLinearSpaceChanged = pCfgHdr->mbLinearSpaceLighting != mpChBLinearSpaceLighting->IsChecked();
+		pCfgHdr->mbLinearSpaceLighting = mpChBLinearSpaceLighting->IsChecked();
+		if(bLinearSpaceChanged)
 		{
 			pCfgHdr->SetGameNeedsRestart();
 		}
@@ -2104,6 +2122,7 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("InsanityActive", pPostEffects->GetInsanity()->IsDisabled()==false);
 		aObj.AddVarBool("HDR", gpBase->mpConfigHandler->mbHDR);
 		aObj.AddVarBool("ToneMap", gpBase->mpConfigHandler->mbToneMap);
+		aObj.AddVarBool("LinearSpaceLighting", gpBase->mpConfigHandler->mbLinearSpaceLighting);
 		aObj.AddVarBool("ShadowMapPCF", gpBase->mpConfigHandler->mbShadowMapPCF);
 
 
@@ -2211,6 +2230,7 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("InsanityActive", mpChBInsanity->IsChecked());
 		aObj.AddVarBool("HDR", mpChBHDR->IsChecked());
 		aObj.AddVarBool("ToneMap", mpChBToneMap->IsChecked());
+		aObj.AddVarBool("LinearSpaceLighting", mpChBLinearSpaceLighting->IsChecked());
 		aObj.AddVarBool("ShadowMapPCF", mpChBShadowPCF->IsChecked());
 
 		///////////////////

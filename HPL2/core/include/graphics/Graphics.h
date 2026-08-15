@@ -140,8 +140,12 @@ namespace hpl {
 		static void SetHDRRendering(bool abX){ mbHDRRendering = abX; }
 		static bool GetHDRRendering(){ return mbHDRRendering; }
 
+		static void SetLinearSpaceRendering(bool abX){ mbLinearSpaceRendering = abX; }
+		static bool GetLinearSpaceRendering(){ return mbLinearSpaceRendering; }
+
 	private:
 		static bool mbHDRRendering;
+		static bool mbLinearSpaceRendering;
 		iLowLevelGraphics *mpLowLevelGraphics;
 		iLowLevelResources *mpLowLevelResources;
 		cMeshCreator *mpMeshCreator;

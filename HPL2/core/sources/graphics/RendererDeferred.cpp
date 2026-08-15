@@ -58,6 +58,7 @@
 #include "scene/MeshEntity.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace hpl {
 
@@ -83,6 +84,18 @@ namespace hpl {
 	//debug
 	bool cRendererDeferred::mbOcclusionTestLargeLights = true;
 	bool cRendererDeferred::mbDebugRenderFrameBuffers = false;
+
+	//-----------------------------------------------------------------------
+
+	static cColor ToLinearColor(const cColor& aColor)
+	{
+		if(cGraphics::GetLinearSpaceRendering()==false) return aColor;
+
+		return cColor(	std::pow(aColor.r, 2.2f),
+						std::pow(aColor.g, 2.2f),
+						std::pow(aColor.b, 2.2f),
+						aColor.a);
+	}
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -310,7 +323,7 @@ namespace hpl {
 		////////////////////////////////////
 		//Create Accumulation texture
 		mpAccumBufferTexture = mpGraphics->CreateTexture("AccumBiffer",eTextureType_Rect,eTextureUsage_RenderTarget);
-		ePixelFormat accumFormat = cGraphics::GetHDRRendering() ? ePixelFormat_RGBA16 : ePixelFormat_RGBA;
+		ePixelFormat accumFormat = (cGraphics::GetHDRRendering() || cGraphics::GetLinearSpaceRendering()) ? ePixelFormat_RGBA16 : ePixelFormat_RGBA;
 		mpAccumBufferTexture->CreateFromRawData(cVector3l(mvScreenSize.x, mvScreenSize.y,0),accumFormat, NULL);
 		mpAccumBufferTexture->SetWrapSTR(eTextureWrap_ClampToEdge);
 
@@ -424,8 +437,23 @@ namespace hpl {
 		}
 
 		////////////////////////////////////
+		if(cGraphics::GetLinearSpaceRendering())
+		{
+			cParserVarContainer vars;
+			vars.Add("UseUv");
+			vars.Add("LinearSpace");
+			iGpuShader *pVtxShader = mpShaderManager->CreateShader("deferred_base_vtx.glsl",eGpuShaderType_Vertex,&vars);
+			iGpuShader *pFragShader = mpShaderManager->CreateShader("deferred_skybox_final_frag.glsl", eGpuShaderType_Fragment,&vars);
+
+			mpBasicSkyBoxProgram = mpGraphics->CreateGpuProgram("DeferredSkyBoxFinal");
+			mpBasicSkyBoxProgram->SetShader(eGpuShaderType_Vertex, pVtxShader);
+			mpBasicSkyBoxProgram->SetShader(eGpuShaderType_Fragment, pFragShader);
+			mpBasicSkyBoxProgram->Link();
+		}
+
+		////////////////////////////////////
 		//Create Tone map program
-		if(cGraphics::GetHDRRendering())
+		if(cGraphics::GetHDRRendering() || cGraphics::GetLinearSpaceRendering())
 		{
 			cParserVarContainer vars;
 			vars.Add("UseUv");
@@ -792,6 +820,7 @@ namespace hpl {
 		/////////////////////////
 		//Gpu programs
 		mpGraphics->DestroyGpuProgram(mpSkyBoxProgram);
+		if(mpBasicSkyBoxProgram) mpGraphics->DestroyGpuProgram(mpBasicSkyBoxProgram);
 		if(mpTonemapProgram) mpGraphics->DestroyGpuProgram(mpTonemapProgram);
 
 		mpProgramManager->DestroyShadersAndPrograms();
@@ -844,7 +873,7 @@ namespace hpl {
 
 		SetFlatProjection();
 
-		if(cGraphics::GetHDRRendering() && mpTonemapProgram)
+		if((cGraphics::GetHDRRendering() || cGraphics::GetLinearSpaceRendering()) && mpTonemapProgram)
 		{
 			SetProgram(mpTonemapProgram);
 			mpTonemapProgram->SetFloat(kVar_afTonemapExposure, 1.0f);
@@ -1390,7 +1419,7 @@ namespace hpl {
 		///////////////////////
 		// General variables
 		apProgram->SetVec3f(kVar_avLightPos, apLightData->m_mtxViewSpaceRender.GetTranslation());
-		apProgram->SetColor4f(kVar_avLightColor, pLight->GetDiffuseColor());
+		apProgram->SetColor4f(kVar_avLightColor, ToLinearColor(pLight->GetDiffuseColor()));
 		apProgram->SetFloat(kVar_afInvLightRadius, 1.0f / pLight->GetRadius());
 
 		////////////////////////
@@ -2421,7 +2450,7 @@ namespace hpl {
 		//Set up Light specific variables
 		if(mpLightBoxProgram[lProgramNum])
 		{
-			mpLightBoxProgram[lProgramNum]->SetColor4f(kVar_avLightColor,pLight->GetDiffuseColor());
+			mpLightBoxProgram[lProgramNum]->SetColor4f(kVar_avLightColor, ToLinearColor(pLight->GetDiffuseColor()));
 		}
 
 		//Blend mode
@@ -2795,7 +2824,7 @@ namespace hpl {
 			if(GetGBufferType() == eDeferredGBuffer_32Bit)
 				pProgram->SetFloat(kVar_afNegFarPlane, -mpCurrentFrustum->GetFarPlane());
 			pProgram->SetVec2f(kVar_avFogStartAndLength, cVector2f(mpCurrentWorld->GetFogStart(), mpCurrentWorld->GetFogEnd() - mpCurrentWorld->GetFogStart()));
-			pProgram->SetColor4f(kVar_avFogColor, mpCurrentWorld->GetFogColor());
+			pProgram->SetColor4f(kVar_avFogColor, ToLinearColor(mpCurrentWorld->GetFogColor()));
 			pProgram->SetFloat(kVar_afFalloffExp, mpCurrentWorld->GetFogFalloffExp());
 		}
 
@@ -2870,7 +2899,7 @@ namespace hpl {
 			if(GetGBufferType() == eDeferredGBuffer_32Bit)
 					pProgram->SetFloat(kVar_afNegFarPlane, -mpCurrentFrustum->GetFarPlane());
 			pProgram->SetVec2f(kVar_avFogStartAndLength, cVector2f(pFogArea->GetStart(), pFogArea->GetEnd() - pFogArea->GetStart()));
-			pProgram->SetColor4f(kVar_avFogColor, pFogArea->GetColor());
+			pProgram->SetColor4f(kVar_avFogColor, ToLinearColor(pFogArea->GetColor()));
 			pProgram->SetFloat(kVar_afFalloffExp, pFogArea->GetFalloffExp());
 		
 			/////////////////////////////////////////////

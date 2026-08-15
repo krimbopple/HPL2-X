@@ -305,11 +305,16 @@ namespace hpl {
 		static void SetShadowMapPCFEnabled(bool abX){ mbShadowMapPCFEnabled = abX;}
 		static bool GetShadowMapPCFEnabled(){ return mbShadowMapPCFEnabled;}
 
+		void SetBasicSkyBoxProgram(iGpuProgram *apProgram){ mpBasicSkyBoxProgram = apProgram; }
+		iGpuProgram *GetBasicSkyBoxProgram(){ return mpBasicSkyBoxProgram; }
+
 		
 		//Debug
 		tRenderableVec *GetShadowCasterVec(){ return &mvShadowCasters;}
 
 	protected:
+		iGpuProgram *mpBasicSkyBoxProgram = NULL;
+
 		/**
 		* In case some intermediate format is used then make sure it is at the correct buffer before ending rendering. 
 		* When sending to a frame buffer at the end, then this method is never called and the intermediate can be returned with GetPostEffectFrameBuffer

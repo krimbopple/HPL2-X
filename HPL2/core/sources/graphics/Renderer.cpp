@@ -2060,7 +2060,10 @@ namespace hpl {
 
 		/////////////////////////
 		//Program
-        SetProgram(NULL);
+		if(mpBasicSkyBoxProgram)
+			SetProgram(mpBasicSkyBoxProgram);
+		else
+			SetProgram(NULL);
 		
 		/////////////////////////
 		//Texture and vertex buffer

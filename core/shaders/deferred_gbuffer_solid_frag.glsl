@@ -169,7 +169,10 @@ void main()
 		vec2 vTexCoord = gl_TexCoord[0].xy;
 		vec4 vDiffuseColor = texture(aDiffuseMap, vTexCoord);
 	@endif
-	
+
+	@ifdef LinearSpace
+		vDiffuseColor.rgb = pow(vDiffuseColor.rgb, vec3(2.2));
+	@endif
 	
 	//////////////////////////////////
 	//Set Diffuse color if no environemnt mapping is used.
@@ -211,6 +214,10 @@ void main()
 			float fEnvMapAlpha = texture(aEnvMapAlphaMap, vTexCoord).w;
 			vReflectionColor *= fEnvMapAlpha;
 		@endif
+		
+		@ifdef LinearSpace
+			vReflectionColor.rgb = pow(vReflectionColor.rgb, vec3(2.2));
+		@endif
 				
 		gl_FragData[0] = vDiffuseColor + vReflectionColor * fFresnel;
 	@endif
@@ -234,13 +241,20 @@ void main()
 	//Specular
 	@ifdef RenderTargets_4
 		@ifdef UseSpecular
-			gl_FragData[3].xy = texture(aSpecularMap, vTexCoord).xy;
+			vec2 vSpecVals = texture(aSpecularMap, vTexCoord).xy;
+			@ifdef LinearSpace
+				vSpecVals.x = pow(vSpecVals.x, 2.2);
+			@endif
+			gl_FragData[3].xy = vSpecVals;
 		@else
 			gl_FragData[3].xy = vec2(0.0);
 		@endif
 	@else
 		@ifdef UseSpecular
 			vec2 vSpecVals = texture(aSpecularMap, vTexCoord).xy;
+			@ifdef LinearSpace
+				vSpecVals.x = pow(vSpecVals.x, 2.2);
+			@endif
 			gl_FragData[1].w = vSpecVals.x;
 			gl_FragData[2].w = vSpecVals.y;
 		@else

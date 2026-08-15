@@ -84,7 +84,11 @@ void main()
 	////////////////////
 	//Diffuse 
 	@ifdef UseDiffuseMap
-		vFinalColor = texture(aDiffuseMap, gl_TexCoord[0].xy) * gvColor;
+		vFinalColor = texture(aDiffuseMap, gl_TexCoord[0].xy);
+		@ifdef LinearSpace
+			vFinalColor.rgb = pow(vFinalColor.rgb, vec3(2.2));
+		@endif
+		vFinalColor *= gvColor;
 	@else
 		vFinalColor = vec4(0.0, 0.0 ,0.0, 1.0);
 	@endif
@@ -209,6 +213,10 @@ void main()
 		@ifdef UseCubeMapAlpha
 			float fEnvMapAlpha = texture(aEnvMapAlphaMap, gl_TexCoord[0].xy).w;
 			vReflectionColor *= fEnvMapAlpha;
+		@endif
+		
+		@ifdef LinearSpace
+			vReflectionColor.rgb = pow(vReflectionColor.rgb, vec3(2.2));
 		@endif
 		
 		vFinalColor.xyz += vReflectionColor.xyz*fFresnel*fFinalAlpha*afLightLevel;

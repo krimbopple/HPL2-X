@@ -1144,6 +1144,7 @@ bool cLuxBase::InitEngine()
 	iRenderer::SetRefractionEnabled(mpConfigHandler->mbRefraction);
 
 	cGraphics::SetHDRRendering(mpConfigHandler->mbHDR);
+	cGraphics::SetLinearSpaceRendering(mpConfigHandler->mbLinearSpaceLighting);
 
 	cRendererDeferred::SetSSAOBufferSizeDiv(mpConfigHandler->mlSSAOResolution==0? 2 : 1);
 	cRendererDeferred::SetSSAONumOfSamples(mpConfigHandler->mlSSAOSamples);

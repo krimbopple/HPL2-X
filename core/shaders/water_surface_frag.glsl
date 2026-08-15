@@ -99,6 +99,10 @@ void main()
 	//Get the diffuse color
 	vec4 vSurfaceColor = texture(aDiffuseMap, vUv1);
 	
+	@ifdef LinearSpace
+		vSurfaceColor.rgb = pow(vSurfaceColor.rgb, vec3(2.2));
+	@endif
+	
 	
 	///////////////////////////////
 	//Get the fog amount
@@ -153,6 +157,9 @@ void main()
 			vEnvUv = (a_mtxInvViewRotation * vec4(vEnvUv,1)).xyz;
 					
 			vec4 vReflectionColor = texture(aEnvMap,vEnvUv);
+			@ifdef LinearSpace
+				vReflectionColor.rgb = pow(vReflectionColor.rgb, vec3(2.2));
+			@endif
 		//////////////////
 		//World reflection
 		@else

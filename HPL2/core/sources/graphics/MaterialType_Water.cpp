@@ -19,6 +19,8 @@
 
 #include "graphics/MaterialType_Water.h"
 
+#include <cmath>
+
 #include "system/LowLevelSystem.h"
 #include "system/PreprocessParser.h"
 
@@ -135,6 +137,7 @@ namespace hpl {
 		defaultVars.Add("UseRefractionEdgeCheck");
 		defaultVars.Add("UseNormals");
 		defaultVars.Add("UseNormalMapping");
+		if(cGraphics::GetLinearSpaceRendering())	defaultVars.Add("LinearSpace");
 		if(iRenderer::GetRefractionEnabled())	defaultVars.Add("UseRefraction");
         				
 		mpProgramManager->SetupGenerateProgramData(	eMaterialRenderMode_Diffuse,"Diffuse","deferred_base_vtx.glsl", "water_surface_frag.glsl", 
@@ -282,7 +285,15 @@ namespace hpl {
 			cWorld *pWorld = apRenderer->GetCurrentWorld();
 
 			apProgram->SetVec2f(kVar_avFogStartAndLength, cVector2f(pWorld->GetFogStart(), pWorld->GetFogEnd() - pWorld->GetFogStart()));
-			apProgram->SetColor4f(kVar_avFogColor, pWorld->GetFogColor());
+
+			cColor fogColor = pWorld->GetFogColor();
+			if(cGraphics::GetLinearSpaceRendering())
+			{
+				fogColor.r = std::pow(fogColor.r, 2.2f);
+				fogColor.g = std::pow(fogColor.g, 2.2f);
+				fogColor.b = std::pow(fogColor.b, 2.2f);
+			}
+			apProgram->SetColor4f(kVar_avFogColor, fogColor);
 			apProgram->SetFloat(kVar_afFalloffExp, pWorld->GetFogFalloffExp());
 
 			//////////////////////////////

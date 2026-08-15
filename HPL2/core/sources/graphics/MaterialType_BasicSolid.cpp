@@ -307,6 +307,8 @@ namespace hpl {
 		if(cRendererDeferred::GetNumOfGBufferTextures() == 4)	defaultVars.Add("RenderTargets_4");
 		else													defaultVars.Add("RenderTargets_3");
 
+		if(cGraphics::GetLinearSpaceRendering())				defaultVars.Add("LinearSpace");
+
 		//Set up relief mapping method
 		if(	iRenderer::GetParallaxQuality() != eParallaxQuality_Low &&
 			mpGraphics->GetLowLevel()->GetCaps(eGraphicCaps_ShaderModel_3)!=0) 
@@ -327,6 +329,7 @@ namespace hpl {
 		//Load Illumination programs
 		defaultVars.Clear();
 		defaultVars.Add("UseUv");
+		if(cGraphics::GetLinearSpaceRendering())	defaultVars.Add("LinearSpace");
 		mpProgramManager->SetupGenerateProgramData(	eMaterialRenderMode_Illumination,"Illum","deferred_base_vtx.glsl", "deferred_illumination_frag.glsl", 
 													vIllumFeatureVec,kIllumFeatureNum, defaultVars);
 

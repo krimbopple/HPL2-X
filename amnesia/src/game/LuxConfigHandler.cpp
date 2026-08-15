@@ -117,6 +117,7 @@ void cLuxConfigHandler::LoadMainConfig()
 	mbToneMap =			gpBase->mpMainConfig->GetBool("Graphics", "ToneMap", false);
 	mfToneMapExposure =	gpBase->mpMainConfig->GetFloat("Graphics", "ToneMapExposure", 1.0f);
 	mfToneMapGamma =	gpBase->mpMainConfig->GetFloat("Graphics", "ToneMapGamma", 2.2f);
+	mbLinearSpaceLighting = gpBase->mpMainConfig->GetBool("Graphics", "LinearSpaceLighting", false);
 	
 	// Misc
 	mbWorldReflection = gpBase->mpMainConfig->GetBool("Graphics", "WorldReflection", true);
@@ -208,6 +209,7 @@ void cLuxConfigHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetBool("Graphics", "ToneMap", mbToneMap);
 	gpBase->mpMainConfig->SetFloat("Graphics", "ToneMapExposure", mfToneMapExposure);
 	gpBase->mpMainConfig->SetFloat("Graphics", "ToneMapGamma", mfToneMapGamma);
+	gpBase->mpMainConfig->SetBool("Graphics", "LinearSpaceLighting", mbLinearSpaceLighting);
 
 	gpBase->mpMainConfig->SetInt("Graphics","ParallaxQuality", mlParallaxQuality);
 	gpBase->mpMainConfig->SetBool("Graphics", "ParallaxEnabled", mbParallaxEnabled);

@@ -152,6 +152,8 @@ namespace hpl {
 			defaultVars.Add("UseUv");
 			defaultVars.Add("UseNormals");
 			defaultVars.Add("UseColor");
+
+			if(cGraphics::GetLinearSpaceRendering()) defaultVars.Add("LinearSpace");
 			
 			if(i==0) defaultVars.Add("BlendMode_Add");
 			if(i==1) defaultVars.Add("BlendMode_Mul");

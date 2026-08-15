@@ -15,6 +15,10 @@ void main()
 	////////////////////
 	//Diffuse 
 	vec4 vFinalColor = texture(aDiffuseMap, gl_TexCoord[0].xy);
+	
+	@ifdef LinearSpace
+		vFinalColor.rgb = pow(vFinalColor.rgb, vec3(2.2));
+	@endif
 		
 	gl_FragColor = vFinalColor * gvColor;
 }

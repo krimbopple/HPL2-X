@@ -63,6 +63,7 @@ namespace hpl {
 	//////////////////////////////////////////////////////////////////////////
 
 	bool cGraphics::mbHDRRendering = false;
+	bool cGraphics::mbLinearSpaceRendering = false;
 
 	//-----------------------------------------------------------------------
 
