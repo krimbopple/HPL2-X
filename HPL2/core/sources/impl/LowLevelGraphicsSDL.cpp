@@ -218,6 +218,10 @@ namespace hpl {
 		}
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+
         unsigned int mlFlags = SDL_WINDOW_OPENGL;
         if (alWidth == 0 && alHeight == 0) {
             mvScreenSize = cVector2l(800,600);
@@ -258,6 +262,18 @@ namespace hpl {
             mvScreenSize = cVector2l(w, h);
         }
         mGLContext = SDL_GL_CreateContext(mpScreen);
+        if(mGLContext==NULL)
+        {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 0);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
+            mGLContext = SDL_GL_CreateContext(mpScreen);
+        }
+        if(mGLContext==NULL)
+        {
+            FatalError("Unable to create OpenGL context! %s\n", SDL_GetError());
+            return false;
+        }
 #else
 		unsigned int mlFlags = SDL_OPENGL;
 
@@ -534,12 +550,13 @@ namespace hpl {
 
 		switch(aType)
 		{
-		case eGraphicCaps_TextureTargetRectangle:	return 1;//GLEW_ARB_texture_rectangle?1:0;
+		case eGraphicCaps_TextureTargetRectangle:	return GLEW_ARB_texture_rectangle ? 1 : 0;
 		
-		case eGraphicCaps_VertexBufferObject:		return GLEW_ARB_vertex_buffer_object?1:0;
+		case eGraphicCaps_VertexBufferObject:		return GLEW_VERSION_1_5 ? 1 : 0;
 		case eGraphicCaps_TwoSideStencil:			
 			{
-				if(GLEW_EXT_stencil_two_side) return 1;
+				if(GLEW_VERSION_2_0) return 1;
+				else if(GLEW_EXT_stencil_two_side) return 1;
 				else if(GLEW_ATI_separate_stencil) return 1;
 				else return 0;
 			}
@@ -547,20 +564,20 @@ namespace hpl {
 		case eGraphicCaps_MaxTextureImageUnits:
 			{
 				int lUnits;
-				glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS_ARB,(GLint *)&lUnits);
+				glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,(GLint *)&lUnits);
 				return lUnits;
 			}
 
 		case eGraphicCaps_MaxTextureCoordUnits:
 			{
 				int lUnits;
-				glGetIntegerv(GL_MAX_TEXTURE_COORDS_ARB,(GLint *)&lUnits);
+				glGetIntegerv(GL_MAX_TEXTURE_COORDS,(GLint *)&lUnits);
 				return lUnits;
 			}
 		case eGraphicCaps_MaxUserClipPlanes:
 			{
 				int lClipPlanes;
-				glGetIntegerv( GL_MAX_CLIP_PLANES,(GLint *)&lClipPlanes);
+				glGetIntegerv( GL_MAX_CLIP_DISTANCES,(GLint *)&lClipPlanes);
 				return lClipPlanes;	
 			}
 
@@ -575,14 +592,14 @@ namespace hpl {
 				return (int)fMax;
 			}
 
-		case eGraphicCaps_Multisampling: return GLEW_ARB_multisample ? 1: 0;
+		case eGraphicCaps_Multisampling: return GLEW_VERSION_1_3 ? 1: 0;
 		
-		case eGraphicCaps_TextureCompression:		return GLEW_ARB_texture_compression  ? 1 : 0;
+		case eGraphicCaps_TextureCompression:		return GLEW_VERSION_1_3 ? 1 : 0;
 		case eGraphicCaps_TextureCompression_DXTC:	return GLEW_EXT_texture_compression_s3tc ? 1 : 0;
 		
-		case eGraphicCaps_AutoGenerateMipMaps:		return GLEW_SGIS_generate_mipmap ? 1 : 0;
+		case eGraphicCaps_AutoGenerateMipMaps:		return GLEW_VERSION_1_4 ? 1 : 0;
 	
-		case eGraphicCaps_RenderToTexture:			return GLEW_EXT_framebuffer_object ? 1: 0;
+		case eGraphicCaps_RenderToTexture:			return GLEW_VERSION_3_0 ? 1 : 0;
 		
 		case eGraphicCaps_MaxDrawBuffers:
 			{
@@ -590,38 +607,21 @@ namespace hpl {
 				glGetIntegerv(GL_MAX_DRAW_BUFFERS, &lMaxbuffers);
 				return lMaxbuffers;
 			}
-		case eGraphicCaps_PackedDepthStencil:	return GLEW_EXT_packed_depth_stencil ? 1: 0;		
-		case eGraphicCaps_TextureFloat:			return GLEW_ARB_texture_float ? 1: 0;
+		case eGraphicCaps_PackedDepthStencil:	return GLEW_VERSION_3_0 ? 1: 0;		
+		case eGraphicCaps_TextureFloat:			return GLEW_VERSION_3_0 ? 1: 0;
 
 		case eGraphicCaps_PolygonOffset:		return 1;	//OpenGL always support it!
 
-		case eGraphicCaps_ShaderModel_2:		return (GLEW_ARB_fragment_program || GLEW_ARB_fragment_shader) ? 1 : 0;	//Mac always support this, so not a good test.
-#ifdef __APPLE__
-		case eGraphicCaps_ShaderModel_3:		return 0; // Force return false for OS X as dynamic branching doesn't work well (it's slow)
-		case eGraphicCaps_ShaderModel_4:		return 0;
-#else
-		case eGraphicCaps_ShaderModel_3:
-			{
-				if(mbForceShaderModel3And4Off)
-					return 0;
-				else
-					return  (GLEW_NV_vertex_program3 || GLEW_ATI_shader_texture_lod) ? 1 : 0;
-			}
-		case eGraphicCaps_ShaderModel_4:
-			{
-				if(mbForceShaderModel3And4Off)
-					return 0;
-				else
-					return  GLEW_EXT_gpu_shader4 ? 1 : 0;
-			}
-#endif
+		case eGraphicCaps_ShaderModel_2:		return GLEW_VERSION_2_0 ? 1 : 0;
+		case eGraphicCaps_ShaderModel_3:		return mbForceShaderModel3And4Off ? 0 : (GLEW_VERSION_3_0 ? 1 : 0);
+		case eGraphicCaps_ShaderModel_4:		return mbForceShaderModel3And4Off ? 0 : (GLEW_VERSION_3_2 ? 1 : 0);
 		
 		case eGraphicCaps_OGL_ATIFragmentShader: return  GLEW_ATI_fragment_shader ? 1 : 0;
 
 		case eGraphicCaps_MaxColorRenderTargets:
 			{
 				GLint lMax;
-				glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &lMax);
+				glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &lMax);
 				return lMax;
 			}
 		}
@@ -2315,6 +2315,7 @@ namespace hpl {
 	{
 		;
 
+		glBindVertexArray(0);
 		SetVtxBatchStates(aTypeFlags);
 		SetUpBatchArrays();
 
@@ -2334,6 +2335,7 @@ namespace hpl {
 	{
 		;
 
+		glBindVertexArray(0);
 		SetVtxBatchStates(aTypeFlags);
 		SetUpBatchArrays();
 

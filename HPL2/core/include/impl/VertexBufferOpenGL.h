@@ -28,6 +28,7 @@ namespace hpl {
 	//---------------------------------------------------------
 	
 	extern unsigned int GetGLArrayFromVertexElement(eVertexBufferElement aType);
+	extern unsigned int GetGLAttribLocationFromVertexElement(eVertexBufferElement aType);
 	extern unsigned int GetGLTypeFromVertexFormat(eVertexBufferElementFormat aFormat);
 
 	extern unsigned int GetDrawModeFromDrawType(eVertexBufferDrawType aDrawType);

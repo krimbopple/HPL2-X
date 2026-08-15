@@ -44,7 +44,9 @@ namespace hpl {
 												int alReserveVtxSize,int alReserveIdxSize) :
 	iVertexBufferOpenGL(apLowLevelGraphics,eVertexBufferType_Hardware,  aDrawType,aUsageType, alReserveVtxSize, alReserveIdxSize)
 	{
+		mlVertexArrayHandle =0;
 		mlElementHandle =0;
+		mbHasVertexArrays = GLEW_VERSION_3_0 != GL_FALSE;
 	}
 
 	//-----------------------------------------------------------------------
@@ -52,6 +54,9 @@ namespace hpl {
 	cVertexBufferOGL_VBO::~cVertexBufferOGL_VBO()
 	{
 		;
+
+		if(mbHasVertexArrays && mlVertexArrayHandle)
+			glDeleteVertexArrays(1,(GLuint *)&mlVertexArrayHandle);
 
 		for(size_t i=0; i<mvElementArrays.size(); ++i)
 		{
@@ -127,7 +132,8 @@ namespace hpl {
 	
 		//////////////////////////////////
 		//Bind and draw the buffer
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,mlElementHandle);
+		if(mbHasVertexArrays) glBindVertexArray(mlVertexArrayHandle);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mlElementHandle);
 
 		int lSize = mlElementNum;
 		if(mlElementNum<0) lSize = GetIndexNum();
@@ -135,7 +141,8 @@ namespace hpl {
 		glDrawElements(mode,lSize,GL_UNSIGNED_INT, (char*) NULL);
 		//glDrawRangeElements(mode,0,GetVertexNum(),lSize,GL_UNSIGNED_INT, NULL);
 
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		if(mbHasVertexArrays) glBindVertexArray(0);
 	}
 
 	//-----------------------------------------------------------------------
@@ -152,7 +159,11 @@ namespace hpl {
 
 		//////////////////////////////////
 		//Bind and draw the buffer
+		if(mbHasVertexArrays) glBindVertexArray(mlVertexArrayHandle);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 		glDrawElements(mode, alCount, GL_UNSIGNED_INT, apIndices);
+		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mlElementHandle);
+		if(mbHasVertexArrays) glBindVertexArray(0);
 	}
 
 
@@ -161,6 +172,11 @@ namespace hpl {
 	void cVertexBufferOGL_VBO::Bind()
 	{
 		;
+
+		if(mbHasVertexArrays)
+		{
+			glBindVertexArray(mlVertexArrayHandle);
+		}
 
 		SetVertexStates();
 	}
@@ -171,20 +187,7 @@ namespace hpl {
 	{
 		;
 
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
-
-		for(size_t i=0; i<mvElementArrays.size(); ++i)
-		{
-			cVtxBufferGLElementArray *pElement = mvElementArrays[i];
-
-			//Log("Unbinding %d handle %d, type: %d\n",i,pElement->mlGLHandle, pElement->mType);
-			
-			int lTextureUnit = GetVertexElementTextureUnit(pElement->mType);
-			if(lTextureUnit >=0) glClientActiveTextureARB(GL_TEXTURE0_ARB + lTextureUnit);
-
-			glDisableClientState( GetGLArrayFromVertexElement(pElement->mType) );
-		}
-		glClientActiveTextureARB(GL_TEXTURE0_ARB);
+		if(mbHasVertexArrays) glBindVertexArray(0);
 	}
 
 	//-----------------------------------------------------------------------
@@ -227,6 +230,22 @@ namespace hpl {
 			&mvIndexArray[0], usageType);
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
 
+		if(mbHasVertexArrays)
+		{
+			glGenVertexArrays(1,(GLuint *)&mlVertexArrayHandle);
+			glBindVertexArray(mlVertexArrayHandle);
+
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mlElementHandle);
+
+			SetVertexStates();
+
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+			glBindVertexArray(0);
+		}
+		else
+		{
+			SetVertexStates();
+		}
 	}
 
 	//-----------------------------------------------------------------------

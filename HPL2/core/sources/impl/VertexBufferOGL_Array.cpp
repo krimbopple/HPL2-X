@@ -99,6 +99,8 @@ namespace hpl {
 	{
 		;
 
+		glBindVertexArray(0);
+
 		SetVertexStates();
 	}
 
@@ -108,6 +110,7 @@ namespace hpl {
 	{
 		;
 
+		glBindVertexArray(0);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
 
 		for(size_t i=0; i<mvElementArrays.size(); ++i)

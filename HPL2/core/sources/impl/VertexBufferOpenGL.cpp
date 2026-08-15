@@ -62,6 +62,29 @@ namespace hpl {
 
 		return 0;
 	}
+
+	unsigned int GetGLAttribLocationFromVertexElement(eVertexBufferElement aType)
+	{
+		switch(aType)
+		{
+		case eVertexBufferElement_Position:			return 0;
+		case eVertexBufferElement_Normal:			return 2;
+		case eVertexBufferElement_Color0:			return 3;
+		case eVertexBufferElement_Color1:			return 4;
+		case eVertexBufferElement_Texture0:			return 8;
+		case eVertexBufferElement_Texture1:			return 9;
+		case eVertexBufferElement_Texture1Tangent:	return 9;
+		case eVertexBufferElement_Texture2:			return 10;
+		case eVertexBufferElement_Texture3:			return 11;
+		case eVertexBufferElement_Texture4:			return 12;
+		case eVertexBufferElement_User0:			return 13;
+		case eVertexBufferElement_User1:			return 14;
+		case eVertexBufferElement_User2:			return 15;
+		case eVertexBufferElement_User3:			return 16;
+		}
+
+		return 0;
+	}
 	
 	unsigned int  GetGLTypeFromVertexFormat(eVertexBufferElementFormat aFormat)
 	{
